@@ -1,6 +1,5 @@
 import tornado.web
 from tornado import gen
-from gerritmetrix.components.gerritbucket import GerritBucket
 from gerritmetrix.components.gerritmetrixbucket import GerritMetrixBucket
 from gerritmetrix.components.gerritcibucket import GerritCiBucket
 from copy import deepcopy
@@ -21,52 +20,6 @@ class ProjectsHandler(tornado.web.RequestHandler):
         projects = yield bucket.get_projects(params)
 
         self.write({"rows": projects})
-
-    @gen.coroutine
-    def copy(self):
-        bucket = GerritBucket()
-        bucket.initialise()
-
-        new_bucket = GerritMetrixBucket()
-        new_bucket.initialise()
-
-        id_max = yield bucket.bucket.counter('id_generator', 1, 0)
-        for i in range(0, id_max.value):
-            try:
-                doc = yield bucket.get_doc(str(i))
-                if doc['type'] == 'patchset-created':
-                    doc_id = doc['change']['number']
-                    try:
-                        parent_doc = yield new_bucket.get_doc(doc_id)
-                        parent_doc['patchSets'].append(doc)
-                        parent_doc['lastUpdate'] = doc['eventCreatedOn']
-                        parent_doc['status'] = doc['change']['status']
-                        yield new_bucket.bucket.upsert(doc_id, parent_doc)
-                    except Exception:
-                        clone = deepcopy(doc)
-                        doc['lastUpdate'] = doc['eventCreatedOn']
-                        doc['patchSets'] = [clone]
-                        doc['statuses'] = []
-                        doc['comments'] = []
-                        doc['status'] = clone['change']['status']
-                        yield new_bucket.bucket.insert(doc_id, doc)
-
-                else:
-                    search_doc_id = doc['change']['number']
-                    try:
-                        parent_doc = yield new_bucket.get_doc(search_doc_id)
-                        if doc['type'] in ['change-merged', 'change-abandoned', 'change-restored']:
-                            parent_doc['lastUpdate'] = doc['eventCreatedOn']
-                            parent_doc['status'] = doc['change']['status']
-                            parent_doc['statuses'].append(doc)
-                        else:
-                            if doc['type'] == 'comment-added':
-                                parent_doc['comments'].append(doc)
-                        yield new_bucket.bucket.upsert(search_doc_id, parent_doc)
-                    except Exception:
-                        pass
-            except Exception:
-                pass
 
     @gen.coroutine
     def explode(self):
