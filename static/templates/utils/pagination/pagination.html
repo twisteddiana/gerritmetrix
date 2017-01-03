@@ -1,0 +1,4 @@
+<div class="row">
+    <button class="btn btn-default pull-left" ng-class="{'disabled': ((skip / limit) + 1 == 1), 'previous': true}" ng-click="((skip / limit) + 1 > 1)?prevPage():null"><i class="fa fa-chevron-left"></i> Prev</button>
+    <button class="btn btn-default pull-right" ng-class="{'disabled': (total_rows < limit)}" ng-click="(total_rows >= limit)?nextPage():null"><i class="fa fa-chevron-right"></i> Next</button>
+</div>

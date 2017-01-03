@@ -1,0 +1,9 @@
+<div class="change_left" ng-class="{'selected': selected_jobs.indexOf(author.username) > -1}" data-job="{{author.username}}" ng-click="select_job(author.username)">{{author.name}}</div>
+<div class="patchset-content" ng-style="{width: patchSet_width + 'px'}" ng-repeat="line in linear | limitTo : display_limits.limit : display_limits.begin track by line.id">
+    <div class="ci_result result_{{line.change}}_{{line.patchSet}}" uib-tooltip-html="line.text" tooltip-append-to-body="'true'" data-job="{{author.username}}" data-change="{{line.change}}" data-patchSet="{{line.patchSet}}">
+        <!--<div class="fraction"
+             ng-class="{'fraction-success': item.build_final_result == 1, 'fraction-fail': item.build_final_result == 0, 'fraction-other': item.build_final_result == -1}"
+             ng-style="{width: 100 / line.total + '%'}" ng-repeat="item in line.items"></div>-->
+         <div ng-bind-html="trustAsHtml(line.item_html)"></div>
+    </div>
+</div>

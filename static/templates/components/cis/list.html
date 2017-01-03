@@ -1,0 +1,39 @@
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-lg-6">
+            <h1>{{title}} <span>{{subtitle}}</span></h1>
+            <table class="table-list">
+                <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Username</th>
+                    <th>Job count</th>
+                </tr>
+                <tr>
+                    <th><input type="text" class="form-control" data-ng-model="search_query" placeholder="Filter..." ng-model-options="{debounce: 250}"></th>
+                    <th></th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr ng-repeat="author in authors">
+                    <td><a ui-sref="app.ci({name: author.username})">{{author.name}}</a></td>
+                    <td><a ui-sref="app.ci({name: author.username})">{{author.username}}</a></td>
+                    <td>{{author.counter}}</td>
+                </tr>
+                </tbody>
+                <tfoot>
+                <tr>
+                    <td colspan="6">
+                        <pagination></pagination>
+                    </td>
+                </tr>
+                </tfoot>
+            </table>
+        </div>
+        <div class="col-lg-6">
+            <ui-view></ui-view>
+        </div>
+    </div>
+
+</div>

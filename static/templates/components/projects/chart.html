@@ -1,0 +1,79 @@
+<div class="container-fluid">
+    <h1>{{title}} {{subtitle}}</h1>
+    <div class="box">
+        <div class="row">
+            <div class="col-lg-6">
+                <p>Scale</p>
+                <select class="form-control" ng-model="split_scale" ng-change="tickChanged()">
+                    <option value="1">1 hour</option>
+                    <option value="2">2 hours</option>
+                    <option value="5">5 hours</option>
+                    <option value="12">12 hours</option>
+                    <option value="24">1 day</option>
+                </select>
+                <p>Interval</p>
+                <select class="form-control" ng-model="interval" ng-change="intervalChanged()">
+                    <option value="7">Last 7 days</option>
+                    <option value="3">Last 3 days</option>
+                    <option value="1">Last 24 hours</option>
+                    <option value="0">Date range</option>
+                </select>
+
+                <div ng-hide="interval != '0'" class="">
+                    <div style="display: inline-block" class="datepicker-wrapper">
+                        <p>From:</p>
+                        <div uib-datepicker ng-model="datepickerFrom" class="well well-sm" datepicker-options="{showWeeks: true}"></div>
+                    </div>
+                    <div style="display: inline-block" class="datepicker-wrapper">
+                        <p>To:</p>
+                        <div uib-datepicker ng-model="datepickerTo" class="well well-sm" datepicker-options="{showWeeks: true}"></div>
+                    </div>
+                </div>
+
+            </div>
+            <div class="col-lg-6">
+                <p>CI-s</p>
+                <ul>
+                    <li ng-repeat="author in authors">
+                        <i class="fa fa-circle" style="color: {{author.color}}"></i> {{author.name}} <button class="btn btn-danger btn-sm" ng-click="removeAuthor(author)"><i class="fa fa-times"></i></button>
+                        <input type="checkbox" ng-if="author.username != 'jenkins'" ng-model="author.individual" ng-true-value="1" ng-false-value="0" ng-click="updateAuthor(author)">
+                        <ul ng-if="author.individual">
+                            <li ng-repeat="job in author.jobs">
+                                {{job.job}} <i class="fa fa-circle" style="color: {{job.color}}"></i>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+                <input type="text" ng-model="authorSearch" placeholder="Search for a CI (by name or username)" ng-model-options="{debounce: {default: 500,blur: 250}}"
+                       uib-typeahead="author as author.name for author in searchAuthor($viewValue)" typeahead-loading="loadingLocations" typeahead-no-results="noResults" class="form-control"
+                       typeahead-template-url="autocomplete.html"  typeahead-on-select="authorSelect($item, $model, $label)"
+                >
+                <i ng-show="loadingLocations" class="glyphicon glyphicon-refresh"></i>
+                <div ng-show="noResults">
+                    <i class="glyphicon glyphicon-remove"></i> No Results Found
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+    <!--<div class="box">
+        {{results}}
+    </div>-->
+    <div class="box">
+        <div class="row">
+            <div class="col-lg-12">
+                <div d3-linechart type="success"></div>
+            </div>
+            <div class="col-lg-12">
+                <div d3-linechart type="fail"></div>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/ng-template" id="autocomplete.html">
+        <a>
+            <span ng-bind-html="match.label | uibTypeaheadHighlight:query"></span>
+        </a>
+    </script>
+</div>

@@ -1,0 +1,47 @@
+<div class="container-fluid">
+    <h1>{{title}} <span>{{subtitle}}</span></h1>
+    <table class="table-list">
+        <thead>
+            <tr>
+                <th>Project name</th>
+                <th>Subject</th>
+                <th>Owner</th>
+                <th>Change Number</th>
+                <th>Status</th>
+                <th>Event created on</th>
+            </tr>
+        <tr>
+            <th><input type="text" class="form-control" data-ng-model="search_query.project" placeholder="Filter..." ng-model-options="{debounce: 250}"></th>
+            <th></th>
+            <th></th>
+            <th></th>
+            <th>
+                <select class="form-control" data-ng-model="search_query.status" multiple>
+                    <option value="ALL">All</option>
+                    <option value="NEW">New</option>
+                    <option value="MERGED">Merged</option>
+                    <option value="ABANDONED">Abandoned</option>
+                </select>
+            </th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody>
+            <tr ng-repeat="change in changes">
+                <td><a ui-sref="app.projects.detail({project_name: change.project})">{{change.project}}</a></td>
+                <td>{{change.commitMessage | first_line}}</td>
+                <td>{{change.owner.name}}</td>
+                <td><a ui-sref="app.change({change_number: change.number})">{{change.number}}</a></td>
+                <td>{{change.status}}</td>
+                <td>{{change.lastUpdate * 1000 | date:'yyyy-MM-dd HH:mm:ss Z'}}</td>
+            </tr>
+        </tbody>
+        <tfoot>
+               <tr>
+                    <td colspan="6">
+                         <pagination></pagination>
+                    </td>
+               </tr>
+          </tfoot>
+    </table>
+</div>

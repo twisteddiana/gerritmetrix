@@ -1,0 +1,6 @@
+<div class="change_left" ng-class="{'selected': selected_jobs.indexOf(job.job) > -1}" data-job="{{job.job}}" ng-click="select_job(job.job)">{{job.job}}</div>
+<div class="patchset-content" ng-style="{width: patchSet_width + 'px'}" ng-repeat="line in linear | limitTo : display_limits.limit : display_limits.begin track by line.id ">
+    <div class="ci_result result_{{line.change}}_{{line.patchSet}}" uib-tooltip-html="line.text" tooltip-append-to-body="'true'" data-job="{{line.job}}" data-change="{{line.change}}" data-patchSet="{{line.patchSet}}">
+        <div ng-bind-html="trustAsHtml(line.item_html)"></div>
+    </div>
+</div>

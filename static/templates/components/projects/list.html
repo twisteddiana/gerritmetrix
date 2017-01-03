@@ -1,0 +1,40 @@
+<div class="container-fluid">
+    <h1>{{title}} <span>{{subtitle}}</span></h1>
+    <table class="table-list">
+        <thead>
+            <tr>
+                <td>Chart</td>
+                <th>Project name</th>
+                <th>Last change</th>
+                <th>Status</th>
+                <th>Event created on</th>
+            </tr>
+        <tr>
+            <th></th>
+            <th><input type="text" class="form-control" data-ng-model="search_query" placeholder="Filter..." ng-model-options="{debounce: 250}"></th>
+            <th></th>
+            <th></th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody>
+            <tr ng-repeat="project in projects">
+                <td>
+                    <a ui-sref="app.projects.chart({project_name: project.project})">View Chart</a>
+                    <a ui-sref="app.projects.table({project_name: project.project})">View Table</a>
+                </td>
+                <td><a ui-sref="app.projects.detail({project_name: project.project})">{{project.project}}</a></td>
+                <td><a ui-sref="app.change({change_number: project.number})">{{project.number}}</a></td>
+                <td>{{project.status[project.status.length - 1]}}</td>
+                <td>{{project.lastUpdate * 1000 | date:'yyyy-MM-dd HH:mm:ss Z'}}</td>
+            </tr>
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="4">
+                    <pagination></pagination>
+                </td>
+            </tr>
+        </tfoot>
+    </table>
+</div>

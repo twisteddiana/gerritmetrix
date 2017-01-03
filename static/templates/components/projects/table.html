@@ -1,0 +1,119 @@
+<div class="container-fluid">
+    <h1>CI table for {{subtitle}}</h1>
+    <div class="panel panel-default panel-collapse">
+        <div class="panel-heading" ng-click="settingsCollapsed = !settingsCollapsed">
+            <span ng-if="!settingsCollapsed">Settings</span>
+            <div class="details" ng-if="settingsCollapsed">
+                Interval:
+                <strong ng-if="interval == 7">7 days</strong>
+                <strong ng-if="interval == 3">3 days</strong>
+                <strong ng-if="interval == 1">24 hours</strong>
+                <strong ng-if="interval == 0">
+                    {{datepickerFrom}} - {{datepickerTo}}
+                </strong>
+                &nbsp;
+                CI-s: <strong ng-repeat="author in authors">{{author.name}} (<span ng-if="author.show_jobs">All</span><span ng-if="!author.show_jobs">Build only</span>) </strong>
+                &nbsp;
+                Filtering:
+                <strong ng-if="!only_selected_jobs">Showing all jobs</strong>
+                <strong ng-if="only_selected_jobs">Showing only selected jobs</strong>
+            </div>
+            <div class="collapser"><i class="fa" ng-class="{'fa-chevron-up': !settingsCollapsed, 'fa-chevron-down': settingsCollapsed}"></i></div>
+        </div>
+        <div class="panel-body" uib-collapse="settingsCollapsed">
+            <div class="row">
+                <div class="col-lg-5">
+                    <div class="form-group row">
+                        <div class="col-lg-2">
+                            <label class="control-label">Interval</label>
+                        </div>
+                        <div class="col-lg-10">
+                            <select class="form-control" ng-model="interval" ng-change="intervalChanged()">
+                                <option value="7">Last 7 days</option>
+                                <option value="3">Last 3 days</option>
+                                <option value="1">Last 24 hours</option>
+                                <option value="0">Date range</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div ng-hide="interval != '0'" class="">
+                        <div style="display: inline-block" class="datepicker-wrapper">
+                            <div uib-datepicker ng-model="datepickerFrom" class="well well-sm" datepicker-options="{showWeeks: true}"></div>
+                        </div>
+                        <div style="display: inline-block" class="datepicker-wrapper">
+                            <div uib-datepicker ng-model="datepickerTo" class="well well-sm" datepicker-options="{showWeeks: true}"></div>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="col-lg-7">
+                    <ul class="ci-list" ui-sortable ng-model="authors">
+                        <li ng-repeat="author in authors">
+                            <span class="author-name">{{author.name}}</span>
+                            <button class="btn btn-danger btn-xs pull-right" ng-click="removeAuthor(author)"><i class="fa fa-times"></i></button>
+                            <button type="button" class="btn btn-green btn-xs pull-right" style="margin-right: 20px;" ng-model="author.show_jobs" uib-btn-checkbox btn-checkbox-true="1" btn-checkbox-false="0">
+                                <span ng-if="author.show_jobs">Showing all jobs</span>
+                                <span ng-if="!author.show_jobs">Showing build results only</span>
+                            </button>
+                        </li>
+                    </ul>
+                    <input type="text" ng-model="authorSearch" placeholder="Search for a CI (by name or username)" ng-model-options="{debounce: {default: 500,blur: 250}}"
+                           uib-typeahead="author as author.name for author in searchAuthor($viewValue)" typeahead-loading="loadingLocations" typeahead-no-results="noResults" class="form-control"
+                           typeahead-template-url="autocomplete.html"  typeahead-on-select="authorSelect($item, $model, $label)"
+                    >
+                    <div ng-show="noResults">
+                        <i class="fa fa-times"></i> No Results Found
+                    </div>
+                    <br>
+                    <button class="btn btn-green btn-sm" ng-model="only_selected_jobs" uib-btn-checkbox btn-checkbox-true="true" btn-checkbox-false="false">
+                        <span ng-if="!only_selected_jobs">Show only selected jobs</span>
+                        <span ng-if="only_selected_jobs">Show all jobs</span>
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <div class="box" id="box_holder">
+        <div class="holder" style="overflow-x: scroll">
+            <div class="dummy" style="overflow: hidden" ng-style="{width: patchSet_count * (patchSet_width) + 400 + 'px'}">
+                <div class="table-holder">
+                    <div class="thead" ng-style="{width: patchSet_count * (patchSet_width) + 'px'}">
+                        <div class="thead_row">
+                            <div class="change_left"></div>
+                            <div class="change-header" data-change="{{change[0]}}" ng-style="{width: (patchSet_width) + 'px'}"
+                                 data-change="{{change[0]}}" data-patchSet="{{change[1]}}" ng-repeat="change in changes | limitTo : display_limits.limit : display_limits.begin ">{{change[0]}}</div>
+                        </div>
+                        <!--<div class="thead_row" ci-table-header changes="changes"></div>-->
+                        <div class="thead_row">
+                            <div class="change_left"></div>
+                            <div class="patchset-header" data-change="{{change[0]}}" data-patchSet="{{change[1]}}"
+                                 ng-style="{width: patchSet_width + 'px'}" ng-repeat="change in changes | limitTo : display_limits.limit : display_limits.begin ">
+                                {{change[1]}}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tbody" ng-repeat="author in authors track by author.username">
+                        <div ng-if="!only_selected_jobs || (only_selected_jobs && selected_jobs.indexOf(author.username) > -1)"
+                             class="tbody_row author_row" ci-author-header author="author" results="final_results[author.username]"></div>
+                        <div ng-if="author.show_jobs && (!only_selected_jobs || (only_selected_jobs && selected_jobs.indexOf(job.job) > -1))"
+                             class="tbody_row" ci-author-content author="author" job="job"
+                             results="final_results[author.username][job.job]" ng-repeat="job in author.jobs track by job.job" ng-style="{width: patchSet_count * (patchSet_width) + 'px'}"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/ng-template" id="autocomplete.html">
+        <a>
+            <span ng-bind-html="match.label | uibTypeaheadHighlight:query"></span>
+        </a>
+    </script>
+    <div class="sidepatch hidden">
+        <div class="left"></div>
+        <div class="right"></div>
+    </div>
+    <div class="scroll-holder"><div class="scroller" ng-style="{width: patchSet_count * (patchSet_width) + 400 + 'px'}">&nbsp;</div></div>
+    <table-mouseover-scroll></table-mouseover-scroll>
+</div>

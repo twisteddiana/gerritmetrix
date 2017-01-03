@@ -1,0 +1,17 @@
+[general]
+port=8888
+
+[metrix-bucket]
+name =
+password =
+server = couchbase://127.0.0.1/
+
+[ci-bucket]
+name =
+password =
+server = couchbase://127.0.0.1/
+
+[gerrit]
+username =
+host = review.openstack.org
+key =

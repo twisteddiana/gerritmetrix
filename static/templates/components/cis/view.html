@@ -1,0 +1,29 @@
+<div class="container-fluid">
+    <div class="row">
+        <h1>{{name}}</h1>
+        <table class="table-list">
+                <thead>
+                <tr>
+                    <th>Username</th>
+                </tr>
+                <tr>
+                    <th><input type="text" class="form-control" data-ng-model="search_query" placeholder="Filter..." ng-model-options="{debounce: 250}"></th>
+                    <th></th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr ng-repeat="job in jobs">
+                    <td>{{job.name}}</td>
+                </tr>
+                </tbody>
+                <tfoot>
+                <tr>
+                    <td colspan="6">
+                        <pagination></pagination>
+                    </td>
+                </tr>
+                </tfoot>
+            </table>
+    </div>
+</div>
