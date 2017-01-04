@@ -91,7 +91,7 @@ gerritmetrix.controller('projectViewCtrl', ['$scope', '$http', '$state', 'SweetA
     $scope.getList();
 }])
 
-gerritmetrix.controller('projectTableCtrl', ['$scope', '$http', '$state', 'Projects', '$location', '$stateParams', 'CI', '$timeout', function($scope, $http, $state, Projects, $location, $stateParams, CI, $timeout) {
+gerritmetrix.controller('projectTableCtrl', ['$scope', '$http', '$state', 'Projects', '$location', '$stateParams', 'CI', '$timeout', 'Changes', function($scope, $http, $state, Projects, $location, $stateParams, CI, $timeout, Changes) {
     $scope.title = "Project";
     $scope.project_name = $stateParams.project_name;
     $scope.subtitle = $scope.project_name;
@@ -103,6 +103,8 @@ gerritmetrix.controller('projectTableCtrl', ['$scope', '$http', '$state', 'Proje
         start: getTimestamp($scope.interval),
         end: Math.floor(Date.now() / 1000)
     }
+
+    $scope.change_tooltips = {};
 
     $scope.only_selected_jobs = false;
     $scope.selected_jobs = [];
@@ -132,6 +134,31 @@ gerritmetrix.controller('projectTableCtrl', ['$scope', '$http', '$state', 'Proje
             $scope.display_limits.limit = displayed_elements + 2 * $scope.margin;
         }
     }
+
+    $scope.loadChangeTooltip = function(change, $event) {
+        if (typeof $scope.change_tooltips[change] == 'undefined') {
+            Changes.getChange(change[0]).then(function (data) {
+                $scope.change_tooltips[change] = {
+                    commitMessage: data.data.change.commitMessage,
+                }
+                angular.forEach(data.data.patchSets, function(patchSet) {
+                    if (patchSet.patchSet.number == change[1]) {
+                        $scope.change_tooltips[change].kind = patchSet.patchSet.kind;
+                        $scope.change_tooltips[change].date = patchSet.patchSet.createdOn;
+                    }
+                })
+                window.console.log(data.data.patchSets);
+                $($event.currentTarget).trigger('mouseoverAjax');
+            })
+        } else {
+            $($event.currentTarget).trigger('mouseoverAjax');
+        }
+    }
+
+    $scope.hideTooltip = function($event) {
+        $($event.target).trigger('mouseleaveAjax');
+    }
+
 
     $('.holder').scroll(function() {
         $timeout(function () {

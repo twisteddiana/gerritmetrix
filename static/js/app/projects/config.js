@@ -2,7 +2,8 @@
  * Created by diana on 15.12.2016.
  */
 
-gerritmetrix.config(['$stateProvider', function ($stateProvider){
+gerritmetrix.config(['$stateProvider', '$uibTooltipProvider', function ($stateProvider, $uibTooltipProvider){
+    $uibTooltipProvider.setTriggers({'mouseoverAjax': 'mouseleaveAjax'});
     $stateProvider
         .state('app.projects', {
             url: '',

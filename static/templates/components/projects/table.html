@@ -82,9 +82,15 @@
                         <div class="thead_row">
                             <div class="change_left"></div>
                             <div class="change-header" data-change="{{change[0]}}" ng-style="{width: (patchSet_width) + 'px'}"
-                                 data-change="{{change[0]}}" data-patchSet="{{change[1]}}" ng-repeat="change in changes | limitTo : display_limits.limit : display_limits.begin ">
+                                 data-change="{{change[0]}}" data-patchSet="{{change[1]}}" ng-repeat="change in changes | limitTo : display_limits.limit : display_limits.begin "
+                                 ng-mouseover="loadChangeTooltip(change, $event)" ng-mouseleave="hideTooltip($event)"
+                                 popover-title="Change {{change[0]}}"
+                                 uib-popover
+                                 popover-trigger="'mouseoverAjax'"
+                                 uib-popover-template="'changePopoverTemplate.html'"
+                            >
                                 <a ui-sref="app.change({change_number: change[0]})">
-                                {{change[0]}}
+                                    {{change[0]}}
                                 </a>
                             </div>
                         </div>
@@ -92,7 +98,13 @@
                         <div class="thead_row">
                             <div class="change_left"></div>
                             <div class="patchset-header" data-change="{{change[0]}}" data-patchSet="{{change[1]}}"
-                                 ng-style="{width: patchSet_width + 'px'}" ng-repeat="change in changes | limitTo : display_limits.limit : display_limits.begin ">
+                                 ng-style="{width: patchSet_width + 'px'}" ng-repeat="change in changes | limitTo : display_limits.limit : display_limits.begin "
+                                 ng-mouseover="loadChangeTooltip(change, $event)" ng-mouseleave="hideTooltip($event)"
+                                 popover-title="Change {{change[0]}}"
+                                 uib-popover
+                                 popover-trigger="'mouseoverAjax'"
+                                 uib-popover-template="'changePopoverTemplate.html'"
+                            >
                                 <a ui-sref="app.change({change_number: change[0]})">
                                 {{change[1]}}
                                 </a>
@@ -111,6 +123,13 @@
         </div>
     </div>
 
+     <script type="text/ng-template" id="changePopoverTemplate.html">
+         <div>
+             <pre>{{change_tooltips[change].commitMessage}}</pre>
+         </div>
+         <hr>
+         <p>Patchset {{change[1]}} uploaded at: {{change_tooltips[change].date * 1000 | date:'EEE, dd MMM yyyy HH:mm:ss' : 'GMT'}} GMT</p>
+    </script>
     <script type="text/ng-template" id="autocomplete.html">
         <a>
             <span ng-bind-html="match.label | uibTypeaheadHighlight:query"></span>
