@@ -84,10 +84,8 @@
                             <div class="change-header" data-change="{{change[0]}}" ng-style="{width: (patchSet_width) + 'px'}"
                                  data-change="{{change[0]}}" data-patchSet="{{change[1]}}" ng-repeat="change in changes | limitTo : display_limits.limit : display_limits.begin "
                                  ng-mouseover="loadChangeTooltip(change, $event)" ng-mouseleave="hideTooltip($event)"
-                                 popover-title="Change {{change[0]}}"
-                                 uib-popover
-                                 popover-trigger="'mouseoverAjax'"
-                                 uib-popover-template="'changePopoverTemplate.html'"
+                                 popover-title="Change {{change[0]}}" uib-popover popover-trigger="'mouseoverAjax'"
+                                 uib-popover-template="'changePopoverTemplate.html'" popover-placemen="auto top"
                             >
                                 <a ui-sref="app.change({change_number: change[0]})">
                                     {{change[0]}}
@@ -100,10 +98,8 @@
                             <div class="patchset-header" data-change="{{change[0]}}" data-patchSet="{{change[1]}}"
                                  ng-style="{width: patchSet_width + 'px'}" ng-repeat="change in changes | limitTo : display_limits.limit : display_limits.begin "
                                  ng-mouseover="loadChangeTooltip(change, $event)" ng-mouseleave="hideTooltip($event)"
-                                 popover-title="Change {{change[0]}}"
-                                 uib-popover
-                                 popover-trigger="'mouseoverAjax'"
-                                 uib-popover-template="'changePopoverTemplate.html'"
+                                 popover-title="Change {{change[0]}}" uib-popover popover-trigger="'mouseoverAjax'"
+                                 uib-popover-template="'changePopoverTemplate.html'" popover-placemen="auto top"
                             >
                                 <a ui-sref="app.change({change_number: change[0]})">
                                 {{change[1]}}

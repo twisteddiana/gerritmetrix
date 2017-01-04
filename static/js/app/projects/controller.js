@@ -147,7 +147,6 @@ gerritmetrix.controller('projectTableCtrl', ['$scope', '$http', '$state', 'Proje
                         $scope.change_tooltips[change].date = patchSet.patchSet.createdOn;
                     }
                 })
-                window.console.log(data.data.patchSets);
                 $($event.currentTarget).trigger('mouseoverAjax');
             })
         } else {
