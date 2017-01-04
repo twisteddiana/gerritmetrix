@@ -93,7 +93,9 @@
                             <div class="change_left"></div>
                             <div class="patchset-header" data-change="{{change[0]}}" data-patchSet="{{change[1]}}"
                                  ng-style="{width: patchSet_width + 'px'}" ng-repeat="change in changes | limitTo : display_limits.limit : display_limits.begin ">
+                                <a ui-sref="app.change({change_number: change[0]})">
                                 {{change[1]}}
+                                </a>
                             </div>
                         </div>
                     </div>

@@ -155,14 +155,23 @@ gerritmetrix.controller('projectTableCtrl', ['$scope', '$http', '$state', 'Proje
     }
 
     $scope.generateQueryParams = function(author) {
-        return {
+
+        var obj = {
             project: $scope.project_name,
             start: $scope.dates.start,
             end: $scope.dates.end,
             author: author.username,
             individual: author.individual,
-            including_changes: 1
         };
+
+        if (!$scope.changes.length)
+            obj.including_changes = 1;
+        else {
+            obj.including_changes = 0;
+            obj.changes_list = $scope.changes_list;
+        }
+
+        return obj;
     }
 
     var loaded = 0;
@@ -194,8 +203,11 @@ gerritmetrix.controller('projectTableCtrl', ['$scope', '$http', '$state', 'Proje
                 })
             }
 
-            $scope.changes = data.data.changes;
-            $scope.patchSet_count = $scope.changes.length;
+            if (typeof data.data.changes != 'undefined') {
+                $scope.changes_list = data.data.changes_list;
+                $scope.changes = data.data.changes;
+                $scope.patchSet_count = $scope.changes.length;
+            }
 
             $scope.processResults(author);
         })

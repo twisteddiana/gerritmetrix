@@ -137,12 +137,13 @@ class GerritCiBucket:
             if author == 'jenkins':
                 query = ' '.join([query, 'and author = "jenkins" and pipeline = "check"'])
             else:
-                query = ' '.join([query, 'and author = "{0}"'.format(author)])
+                query = ' '.join([query, 'and author = "{0}" and change.patchSet'.format(author)])
 
             changes_part = [];
+            query = ' '.join([query, 'and change.`number` in '])
             for change, patchSets in changes.items():
-                changes_part.append('change.`number` = "{0}"'.format(change))
-            query = ' '.join([query, 'and (', ' or '.join(changes_part), ')'])
+                changes_part.append('"{0}"'.format(change))
+            query = ' '.join([query, '[', ','.join(changes_part), ']'])
             query = ' '.join([query, 'order by checkedOn'])
 
         result = yield self.bucket.n1qlQueryAll(query=query)

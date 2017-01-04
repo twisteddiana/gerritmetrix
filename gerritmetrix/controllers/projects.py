@@ -135,14 +135,18 @@ class ProjectChartHandler(tornado.web.RequestHandler):
         cibucket = GerritCiBucket()
         bucket = GerritMetrixBucket()
 
-        changes = yield cibucket.get_changes_interval(params['project'], params['start'], params['end'])
+        if 'changes_list' not in params.keys():
+            changes = yield cibucket.get_changes_interval(params['project'], params['start'], params['end'])
+        else:
+            changes = (params['changes_list'], [])
+
         if changes[0]:
             events = yield cibucket.get_check_result(params['project'], changes[0], params['author'], params['individual'])
         else:
             events = ([],[])
 
-        if 'including_changes' in params.keys():
-            self.write({'result': events[0], 'changes': changes[1], 'jobs': events[1]})
+        if 'including_changes' in params.keys() and params['including_changes']:
+            self.write({'result': events[0], 'changes': changes[1], 'jobs': events[1], 'changes_list': changes[0]})
         else:
             self.write({'result': events[0], 'jobs': events[1]})
 
