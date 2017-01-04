@@ -1,7 +1,7 @@
 /**
  * Created by diana on 15.12.2016.
  */
-gerritmetrix.controller("projectsCtrl",['$scope', '$http', '$state', 'SweetAlert', 'Projects', '$location', function ($scope, $http, $state, SweetAlert, Projects, $location) {
+gerritmetrix.controller("projectsCtrl",['$scope', '$http', '$state', 'SweetAlert', 'Projects', '$location', '$window', function ($scope, $http, $state, SweetAlert, Projects, $location, $window) {
     $scope.title = "Projects";
     $scope.subtitle = "List";
 
@@ -9,15 +9,21 @@ gerritmetrix.controller("projectsCtrl",['$scope', '$http', '$state', 'SweetAlert
     $scope.skip = 0;
     $scope.total_rows = 0;
 
+    //calculate available height
+    var height = $(window).height() -  $('.table-list').offset().top - 120;
+    var total = Math.floor(height/24);
+    $scope.limit = total;
+
+
     if (typeof $location.search().filter != 'undefined')
         $scope.search_query = $location.search().filter;
+
     if (typeof $location.search().page != 'undefined') {
         var page = parseInt($location.search().page);
         if (!isNaN(page)) {
             $scope.skip = (page - 1) * $scope.limit;
         }
     }
-
 
     $scope.generateQueryParams = function() {
         return {
@@ -34,7 +40,13 @@ gerritmetrix.controller("projectsCtrl",['$scope', '$http', '$state', 'SweetAlert
         })
     }
 
-    $scope.$watch('search_query', function () {
+    $scope.getList();
+
+    $scope.$watch('search_query', function (oldval, newval) {
+        if (oldval == newval)
+            return;
+
+
         if ($scope.search_query != '')
             $location.search('filter', $scope.search_query);
         else
@@ -55,6 +67,11 @@ gerritmetrix.controller('projectViewCtrl', ['$scope', '$http', '$state', 'SweetA
     $scope.limit = 50;
     $scope.skip = 0;
     $scope.total_rows = 0;
+
+    //calculate available height
+    var height = $(window).height() -  $('.table-list').offset().top - 70;
+    var total = Math.floor(height/24);
+    $scope.limit = total;
 
     $scope.generateQueryParams = function() {
         return {
@@ -100,7 +117,7 @@ gerritmetrix.controller('projectTableCtrl', ['$scope', '$http', '$state', 'Proje
 
     $scope.final_results = {}
     $scope.patchSet_width = 50;
-    $scope.margin = 50;
+    $scope.margin = 20;
 
     var calibrate = function() {
         var total_width = $('#box_holder').width() - 30 - 400;
@@ -169,10 +186,10 @@ gerritmetrix.controller('projectTableCtrl', ['$scope', '$http', '$state', 'Proje
             if (author.individual) {
                 author.jobs = []
                 var jobs = {}
-                angular.forEach($scope.results[author.username], function(result) {
-                    if (typeof jobs[result.job] == 'undefined') {
-                        author.jobs.push({job: result.job, color: getRandomColor()});
-                        jobs[result.job] = 1;
+                angular.forEach(data.data.jobs, function(job) {
+                    if (typeof jobs[job] == 'undefined') {
+                        author.jobs.push({job: job, color: getRandomColor()});
+                        jobs[job] = 1;
                     }
                 })
             }
@@ -196,7 +213,7 @@ gerritmetrix.controller('projectTableCtrl', ['$scope', '$http', '$state', 'Proje
         var found = false;
         angular.forEach($scope.authors, function(author) {
             if (author.username == $item.username)
-                var found = true;
+                found = true;
         })
 
         if (found) {

@@ -149,11 +149,14 @@ class GerritCiBucket:
         result = yield self.process_rows(result, False)
 
         final_result = []
+        jobs = []
         for row in result:
             if row['patchSet'] in changes[row['number']]:
                 final_result.append(row)
+                if row['job'] not in jobs:
+                    jobs.append(row['job'])
 
-        return final_result
+        return (final_result, jobs)
 
     @gen.coroutine
     def search_author(self, piece, project):

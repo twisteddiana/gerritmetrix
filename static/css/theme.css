@@ -91,7 +91,7 @@ a {
 
 .table-list td , .table-list th {
     border: 1px solid #f4f4f4;
-    padding: 9px 20px;
+    padding: 3px 20px;
 }
 
 .form-control {
@@ -175,9 +175,9 @@ label.filter-label {
 
 .table-list thead tr th {
     border: none;
-    border-bottom: 2px solid #3B3F51;
+    border-bottom: 1px solid #3B3F51;
     color: #3B3F51;
-    font-size: 15px;
+    font-size: 13px;
     font-weight: normal;
 }
 
@@ -191,8 +191,8 @@ label.filter-label {
 
 .table-list tfoot tr td {
     border: none;
-    border-bottom: 2px solid #3B3F51;
-    border-top: 2px solid #3B3F51;
+    border-bottom: 1px solid #3B3F51;
+    border-top: 1px solid #3B3F51;
     color: #3B3F51;
 }
 .table-list tfoot tr td h3 {
@@ -395,11 +395,11 @@ ul.pagination {
     white-space: pre;
 }
 
-.label-success {
+.badge-success {
     color: #2bb8c4;
 }
 
-.label-danger {
+.badge-danger {
     color: #ed6b75;
 }
 

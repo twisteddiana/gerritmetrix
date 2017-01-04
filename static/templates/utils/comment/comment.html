@@ -2,8 +2,8 @@
 <tr ng-if="!skip">
     <th>
         {{author.name}} {{result.pipeline}}
-        <span class="label label-{{verified.class}}" ng-if="verified">{{verified.input}}</span>
-        - <span class="label" ng-class="[{'label-danger': result.build_result.toLowerCase() == 'failed'}, {'label-success': result.build_result.toLowerCase() != 'failed'}]">{{result.build_result}}</span>
+        <span class="badge-{{verified.class}}" ng-if="verified">{{verified.input}}</span>
+        - <span class="" ng-class="[{'badge-danger': result.build_result.toLowerCase() == 'failed'}, {'badge-success': result.build_result.toLowerCase() != 'failed'}]">{{result.build_result}}</span>
     </th>
     <th>{{eventCreatedOn * 1000 | date:'yyyy-MM-dd HH:mm:ss Z'}}</th>
 </tr>
@@ -13,7 +13,7 @@
         <a href="{{ci.link}}" target="_blank">{{ci.name}}</a>
     </td>
     <td>
-        <label class="label label-{{ci.class}}">{{ci.result}}</label>
+        <label class="badge-{{ci.class}}">{{ci.result}}</label>
         {{ci.extra}}
     </td>
 </tr>

@@ -3,7 +3,7 @@
     <table class="table-list">
         <thead>
             <tr>
-                <td>Chart</td>
+                <th>Chart</th>
                 <th>Project name</th>
                 <th>Last change</th>
                 <th>Status</th>
@@ -20,7 +20,7 @@
         <tbody>
             <tr ng-repeat="project in projects">
                 <td>
-                    <a ui-sref="app.projects.chart({project_name: project.project})">View Chart</a>
+                    <!--<a ui-sref="app.projects.chart({project_name: project.project})">View Chart</a>-->
                     <a ui-sref="app.projects.table({project_name: project.project})">View Table</a>
                 </td>
                 <td><a ui-sref="app.projects.detail({project_name: project.project})">{{project.project}}</a></td>
@@ -31,7 +31,7 @@
         </tbody>
         <tfoot>
             <tr>
-                <td colspan="4">
+                <td colspan="5">
                     <pagination></pagination>
                 </td>
             </tr>

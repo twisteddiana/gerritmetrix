@@ -139,12 +139,12 @@ class ProjectChartHandler(tornado.web.RequestHandler):
         if changes[0]:
             events = yield cibucket.get_check_result(params['project'], changes[0], params['author'], params['individual'])
         else:
-            events = []
+            events = ([],[])
 
         if 'including_changes' in params.keys():
-            self.write({'result': events, 'changes': changes[1]})
+            self.write({'result': events[0], 'changes': changes[1], 'jobs': events[1]})
         else:
-            self.write({'result': events})
+            self.write({'result': events[0], 'jobs': events[1]})
 
 
 class ProjectAuthorHandler(tornado.web.RequestHandler):

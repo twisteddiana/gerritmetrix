@@ -1,8 +1,21 @@
 <div class="container-fluid">
-     <h1>{{title}} <span>{{subtitle}}</span></h1>
+    <h1>{{title}} <span>{{subtitle}}</span></h1>
     <div class="row">
         <div class="col-lg-3">
-            <div class="pre">{{change.change.commitMessage}}</div>
+            <div class="box">
+                <h6>Status: {{change.status}}</h6>
+                <dl class="row">
+                    <dd class="col-xs-4">Uploaded at</dd>
+                    <dt class="col-xs-8">{{change.eventCreatedOn * 1000 | date:'yyyy-MM-dd HH:mm:ss Z'}}</dt>
+                    <dd class="col-xs-4">Uploader</dd>
+                    <dt class="col-xs-8">{{change.uploader.name}} ({{change.uploader.email}})</dt>
+
+                </dl>
+            </div>
+            <div class="box">
+
+                <div class="pre">{{change.change.commitMessage}}</div>
+            </div>
         </div>
         <div class="col-lg-6">
             <table class="table-list">
@@ -10,6 +23,12 @@
 
                 </tbody>
             </table>
+        </div>
+        <div class="col-lg-3">
+            <div class="box">
+
+            </div>
+
         </div>
     </div>
 </div>

@@ -151,7 +151,6 @@ gerritmetrix.directive('ciAuthorContent', function($sce, $compile) {
 
                     var full_html = "";
                     //var item = []
-
                     var total = results[change][patchSet].length;
 
                     var text = "<div>";
