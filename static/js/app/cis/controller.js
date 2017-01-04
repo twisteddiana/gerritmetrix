@@ -3,7 +3,7 @@
  */
 
 gerritmetrix.controller("cisCtrl",['$scope', '$http', '$state', 'SweetAlert', 'CI', '$location', function ($scope, $http, $state, SweetAlert, CI, $location) {
-    $scope.title = "CI-s";
+    $scope.title = "CIs";
     $scope.subtitle = "List";
 
     $scope.limit = 50;

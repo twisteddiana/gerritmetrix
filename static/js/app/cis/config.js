@@ -8,11 +8,11 @@ gerritmetrix.config(['$stateProvider', function ($stateProvider){
             templateUrl: 'static/templates/components/cis/list.html',
             controller: 'cisCtrl',
             data: {
-                displayName: 'CI-s'
+                displayName: 'CIs'
             },
             menu: {
                 tag: 'sidebar',
-                name: 'CI-s',
+                name: 'CIs',
                 priority: 200
             }
         })

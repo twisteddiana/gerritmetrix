@@ -24,7 +24,8 @@ class GerritConnector:
         self.bucket.initialise()
         self.cibucket = GerritCiBucket();
         self.cibucket.initialise()
-        self.client = gerrit.Gerrit(config['gerrit']['host'], config['gerrit']['username'], keyfile=config['gerrit']['key'])
+        self.client = gerrit.Gerrit(config['gerrit']['host'], config['gerrit']['username'],
+                                    keyfile=config['gerrit']['key'])
         self.client.startWatching()
 
     def stream(self):
@@ -35,7 +36,8 @@ class GerritConnector:
             add = False
             if event['type'] in ['comment-added', 'change-abandoned', 'change-merged', 'patchset-created', 'change-restored']:
                 if event['type'] == 'comment-added':
-                    if ('username' in event['author'].keys() and event['author']['username'] == 'jenkins') or event['author']['name'][-2:] == 'CI':
+                    if ('username' in event['author'].keys() and event['author']['username'] == 'jenkins') \
+                            or event['author']['name'][-2:] == 'CI':
                        add = True
                 else:
                     add = True
@@ -75,7 +77,14 @@ class GerritConnector:
 
                         if event['type'] == 'comment-added':
                             try:
-                                self.cibucket.bucket.upsert(event['author']['username'], {'type': 'author', 'name': event['author']['name'], 'username': event['author']['username']})
+                                self.cibucket.bucket.upsert(
+                                    event['author']['username'],
+                                    {
+                                        'type': 'author',
+                                        'name': event['author']['name'],
+                                        'username': event['author']['username']
+                                    }
+                                )
                             except Exception:
                                 pass
 
