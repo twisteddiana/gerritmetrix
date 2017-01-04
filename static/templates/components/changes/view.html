@@ -12,23 +12,44 @@
 
                 </dl>
             </div>
+        </div>
+        <div class="col-lg-6">
             <div class="box">
 
                 <div class="pre">{{change.change.commitMessage}}</div>
             </div>
         </div>
-        <div class="col-lg-6">
+        <!--<div class="col-lg-6">
             <table class="table-list">
                 <tbody ng-repeat="comment in lastComments" gerrit-comment="comment" comment="comment">
 
                 </tbody>
             </table>
-        </div>
-        <div class="col-lg-3">
-            <div class="box">
-
+        </div>-->
+    </div>
+    <div class="box" id="box_holder">
+        <div class="holder" style="overflow-x: scroll">
+            <div class="dummy" style="overflow: hidden" ng-style="{width: patchSets.length * patchSet_width + 400 + 'px'}">
+                <div class="table-holder">
+                    <div class="thead" ng-style="{width: patchSets.length * 80 + 'px'}">
+                        <!--<div class="thead_row" ci-table-header changes="changes"></div>-->
+                        <div class="thead_row">
+                            <div class="change_left"></div>
+                            <div class="patchset-header" data-patchSet="{{patchSet.number}}"
+                                 ng-style="{width: patchSet_width + 'px'}" ng-repeat="patchSet in patchSets"
+                            >
+                                    {{patchSet.number}}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tbody" ng-repeat="author in authors track by author.username">
+                        <div class="tbody_row author_row" ci-author-header author="author" results="final_results[author.username]"></div>
+                        <div class="tbody_row" ci-author-content author="author" job="job"
+                             results="final_results[author.username][job.job]" ng-repeat="job in author.jobs track by job.job"
+                             ng-style="{width: patchSets.length * 80 + 'px'}"></div>
+                    </div>
+                </div>
             </div>
-
         </div>
     </div>
 </div>

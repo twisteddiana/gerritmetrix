@@ -61,22 +61,100 @@ gerritmetrix.controller("changesCtrl",['$scope', '$http', '$state', 'SweetAlert'
     }, true);
 }]);
 
-gerritmetrix.controller('changeCtrl', ['$scope', '$http', '$state', 'SweetAlert', 'Changes', '$location', '$stateParams', function($scope, $http, $state, SweetAlert, Changes, $location, $stateParams) {
+gerritmetrix.controller('changeCtrl', ['$scope', '$http', '$state', 'SweetAlert', 'Changes', '$location', '$stateParams', 'Projects', function($scope, $http, $state, SweetAlert, Changes, $location, $stateParams, Projects) {
     $scope.title = "Change";
     $scope.change_number = $stateParams.change_number;
     $scope.subtitle = $scope.change_number;
 
+    $scope.patchSet_width = 80;
+
+    var prepareChange = function(change) {
+        $scope.change = change;
+        $scope.title = $scope.change.change.project;
+
+        $scope.patchSets = [];
+        $scope.change_list = {}
+        $scope.changes = []
+        $scope.change_list[$scope.change_number] = []
+        angular.forEach($scope.change.patchSets, function(patchSet) {
+            $scope.patchSets.push({
+                number: patchSet.patchSet.number,
+                kind: patchSet.patchSet.kind,
+                date: patchSet.patchSet.createdOn
+            });
+            $scope.change_list[$scope.change_number].push(patchSet.patchSet.number);
+            $scope.changes.push([$scope.change_number, patchSet.patchSet.number]);
+        })
+
+        $scope.authors = {}
+        $scope.results = {}
+        $scope.final_results = {}
+        angular.forEach($scope.change.comments, function(comment) {
+            if (typeof $scope.authors[comment.author.username] == 'undefined') {
+                $scope.authors[comment.author.username] = {
+                    username: comment.author.username,
+                    name: comment.author.name,
+                    jobs: []
+                }
+                $scope.results[comment.author.username] = [];
+            }
+        })
+
+        angular.forEach($scope.authors, function(author) {
+            Projects.getChart({
+                project: $scope.change.change.project,
+                author: author.username,
+                individual: 1,
+                including_changes: 0,
+                changes_list: $scope.change_list
+            }).then(function(data) {
+
+                if (typeof data.data.result[0] == 'undefined')
+                    $scope.results[author.username] = []
+                else
+                    $scope.results[author.username] = data.data.result;
+
+                author.jobs = []
+                var jobs = {}
+                angular.forEach(data.data.jobs, function(job) {
+                    if (typeof jobs[job] == 'undefined') {
+                        author.jobs.push({job: job});
+                        jobs[job] = 1;
+                    }
+                })
+
+                $scope.processResults(author);
+            })
+        })
+
+    }
+
+    $scope.processResults = function(author) {
+
+        var final_results = {};
+        angular.forEach(author.jobs, function(job) {
+            final_results[job.job] = {}
+            angular.forEach($scope.patchSets, function(patchSet) {
+                if (typeof final_results[job.job][$scope.change_number] == 'undefined')
+                    final_results[job.job][$scope.change_number] = {}
+                if (typeof final_results[job.job][$scope.change_number][patchSet.number] == 'undefined')
+                    final_results[job.job][$scope.change_number][patchSet.number] = []
+            })
+        })
+
+        angular.forEach($scope.results[author.username], function(result) {
+            if (typeof result.result == 'undefined')
+                result.result = 0;
+            final_results[result.job][result.number][result.patchSet].push({build_result: result.build_result, result: result.result, date: result.checkedOn})
+        })
+
+        $scope.final_results[author.username] = final_results;
+        window.console.log($scope.final_results);
+    }
+
     Changes.getChange($scope.change_number)
         .then(function(data) {
-            $scope.change = data.data;
-            $scope.title = $scope.change.change.project;
-            $scope.lastPatchSet = $scope.change.patchSets.splice(-1)[0];
-            $scope.lastComments = [];
-            for (i in $scope.change.comments) {
-                var comment = $scope.change.comments[i];
-                if (comment.patchSet.number == $scope.lastPatchSet.patchSet.number)
-                    $scope.lastComments.push(comment);
-            }
+            prepareChange(data.data);
         }, function(data) {
             $state.go('app.404');
         })
