@@ -101,7 +101,7 @@ class GerritConnector:
                                 new_doc['pipeline'] = build_result.groupdict()['pipeline']
                                 new_doc['build_result'] = build_result.groupdict()['result']
 
-                            for i in range(4, len(message)):
+                            for i in range(2, len(message)):
                                 if not len(message[i]):
                                     continue
                                 job_result = re.match(
