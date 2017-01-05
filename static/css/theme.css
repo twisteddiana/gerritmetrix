@@ -422,9 +422,14 @@ ul.pagination {
     left: -400px;
 }*/
 
-.thead_row > div, .tbody_row > div, .patchset-content {
+.tbody_row > div, .patchset-content {
     float: left;
     height: 25px;
+}
+
+.thead_row > div {
+    height: 40px;
+    float: left;
 }
 
 .thead_row:after, .tbody_row:after {
