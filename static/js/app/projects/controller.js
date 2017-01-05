@@ -119,7 +119,7 @@ gerritmetrix.controller('projectTableCtrl', ['$scope', '$http', '$state', 'Proje
 
     $scope.final_results = {};
     $scope.author_result = {};
-    $scope.patchSet_width = 50;
+    $scope.patchSet_width = 45;
     $scope.margin = 20;
 
     var calibrate = function() {
@@ -148,7 +148,8 @@ gerritmetrix.controller('projectTableCtrl', ['$scope', '$http', '$state', 'Proje
                         $scope.change_tooltips[change].date = patchSet.patchSet.createdOn;
                     }
                 })
-                $($event.currentTarget).trigger('mouseoverAjax');
+                if ($($event.currentTarget).is(':hover'))
+                     $($event.currentTarget).trigger('mouseoverAjax');
             })
         } else {
             $($event.currentTarget).trigger('mouseoverAjax');
