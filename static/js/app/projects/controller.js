@@ -97,7 +97,7 @@ gerritmetrix.controller('projectTableCtrl', ['$scope', '$http', '$state', 'Proje
     $scope.subtitle = $scope.project_name;
     $scope.authors = [{name: 'Jenkins', username: 'jenkins', color: getRandomColor(), individual: 1,  show_jobs: 1, rendered: 0}]
     $scope.results = {};
-    $scope.changes = {};
+    $scope.changes = [];
     $scope.interval = "7";
     $scope.dates = {
         start: getTimestamp($scope.interval),
@@ -119,8 +119,25 @@ gerritmetrix.controller('projectTableCtrl', ['$scope', '$http', '$state', 'Proje
 
     $scope.final_results = {};
     $scope.author_result = {};
-    $scope.patchSet_width = 45;
-    $scope.margin = 20;
+    $scope.patchSet_width = 25;
+    $scope.margin = 10;
+
+    //the visible ones
+    $scope.visible_changes = []
+    $scope.visible_author_results = []
+    $scope.visible_final_results = []
+
+     var resizeArrays = function() {
+         //update visible
+        $scope.visible_changes = $scope.changes.slice($scope.display_limits.begin, $scope.display_limits.begin + $scope.display_limits.limit);
+        angular.forEach($scope.author_result, function(results, author) {
+            $scope.visible_author_results[author] = results.slice($scope.display_limits.begin, $scope.display_limits.begin + $scope.display_limits.limit);
+            $scope.visible_final_results[author] = {}
+            angular.forEach($scope.final_results[author], function(results, job) {
+                $scope.visible_final_results[author][job] = results.slice($scope.display_limits.begin, $scope.display_limits.begin + $scope.display_limits.limit);
+            })
+        })
+    }
 
     var calibrate = function() {
         var total_width = $('#box_holder').width() - 30 - 400;
@@ -134,7 +151,11 @@ gerritmetrix.controller('projectTableCtrl', ['$scope', '$http', '$state', 'Proje
         else {
             $scope.display_limits.limit = displayed_elements + 2 * $scope.margin;
         }
+
+        resizeArrays();
     }
+
+
 
     $scope.loadChangeTooltip = function(change, $event) {
         if (typeof $scope.change_tooltips[change] == 'undefined') {
@@ -170,6 +191,7 @@ gerritmetrix.controller('projectTableCtrl', ['$scope', '$http', '$state', 'Proje
 
             $('.table-holder').css('padding-left', $scope.display_limits.begin * $scope.patchSet_width + 'px');
             $('.thead.fixed').css('padding-left', $scope.display_limits.begin * $scope.patchSet_width + 'px');
+            resizeArrays();
         }, 0);
     })
 
@@ -238,6 +260,7 @@ gerritmetrix.controller('projectTableCtrl', ['$scope', '$http', '$state', 'Proje
             }
 
             $scope.processResults(author);
+            resizeArrays();
         })
     }
 
