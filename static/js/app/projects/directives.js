@@ -284,27 +284,22 @@ gerritmetrix.component('tableMouseoverScroll', {
                         $('.table-holder .thead').removeClass('fixed').css('padding-left', '0px');
                         $('.sidepatch').addClass('hidden');
                     }
-
-
-                    if ($(window).scrollTop() + $(window).height() > $document.height() - 100) {
-                        $('.scroll-holder').css('opacity', '0');
-                    } else {
-                        $('.scroll-holder').css('opacity', '1');
-                    }
                 }
             )
 
+            var extrascroll =  function() {
+                if ($('.holder').scrollLeft() != $('.scroll-holder').scrollLeft()) {
+                    $('.holder').scrollLeft($('.scroll-holder').scrollLeft());
+                }
+            }
 
-            $('.scroll-holder').scroll(function () {
-                $('.holder').scrollLeft($('.scroll-holder').scrollLeft());
-            })
+            $('.scroll-holder').scroll(extrascroll)
 
             $('.holder').scroll(function() {
                 var scroll_left = $('.holder').scrollLeft();
                 if ($('.table-holder .thead').hasClass('fixed')) {
                     $('.table-holder .thead').css('left', scroll_left * -1 + 430 + 'px');
                 }
-                $('.scroll-holder').scrollLeft(scroll_left);
             })
         }
 
@@ -320,3 +315,26 @@ gerritmetrix.component('tableMouseoverScroll', {
 
     }
 })
+
+gerritmetrix.directive('faSuspendable', function () {
+    return {
+        link: function (scope) {
+            // Heads up: this might break is suspend/resume called out of order
+            // or if watchers are added while suspended
+            var watchers;
+
+            scope.$on('suspend', function () {
+                watchers = scope.$$watchers;
+                scope.$$watchers = [];
+            });
+
+            scope.$on('resume', function () {
+                if (watchers)
+                    scope.$$watchers = watchers;
+
+                // discard our copy of the watchers
+                watchers = void 0;
+            });
+        }
+    };
+});

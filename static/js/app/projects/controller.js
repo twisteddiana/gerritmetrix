@@ -110,16 +110,26 @@ gerritmetrix.controller('projectTableCtrl', ['$scope', '$http', '$state', 'Proje
     $scope.selected_jobs = [];
 
     $scope.select_job = function(job) {
-        var index = $scope.selected_jobs.indexOf(job);
+        /*var index = $scope.selected_jobs.indexOf(job);
         if (index > -1)
             $scope.selected_jobs.splice(index, 1);
         else
-            $scope.selected_jobs.push(job);
+            $scope.selected_jobs.push(job);*/
+        angular.forEach($scope.authors, function(author) {
+            if (author.username == job) {
+                author.selected = !author.selected;
+            } else {
+                angular.forEach(author.jobs, function(_job) {
+                    if (_job.job == job)
+                        _job.selected = !_job.selected;
+                })
+            }
+        })
     }
 
     $scope.final_results = {};
     $scope.author_result = {};
-    $scope.patchSet_width = 25;
+    $scope.patchSet_width = 50;
     $scope.margin = 10;
 
     //the visible ones
@@ -127,8 +137,8 @@ gerritmetrix.controller('projectTableCtrl', ['$scope', '$http', '$state', 'Proje
     $scope.visible_author_results = []
     $scope.visible_final_results = []
 
-     var resizeArrays = function() {
-         //update visible
+    var resizeArrays = function() {
+        //update visible
         $scope.visible_changes = $scope.changes.slice($scope.display_limits.begin, $scope.display_limits.begin + $scope.display_limits.limit);
         angular.forEach($scope.author_result, function(results, author) {
             $scope.visible_author_results[author] = results.slice($scope.display_limits.begin, $scope.display_limits.begin + $scope.display_limits.limit);
@@ -155,8 +165,6 @@ gerritmetrix.controller('projectTableCtrl', ['$scope', '$http', '$state', 'Proje
         resizeArrays();
     }
 
-
-
     $scope.loadChangeTooltip = function(change, $event) {
         if (typeof $scope.change_tooltips[change] == 'undefined') {
             Changes.getChange(change[0]).then(function (data) {
@@ -170,7 +178,7 @@ gerritmetrix.controller('projectTableCtrl', ['$scope', '$http', '$state', 'Proje
                     }
                 })
                 if ($($event.currentTarget).is(':hover'))
-                     $($event.currentTarget).trigger('mouseoverAjax');
+                    $($event.currentTarget).trigger('mouseoverAjax');
             })
         } else {
             $($event.currentTarget).trigger('mouseoverAjax');
@@ -183,16 +191,18 @@ gerritmetrix.controller('projectTableCtrl', ['$scope', '$http', '$state', 'Proje
 
 
     $('.holder').scroll(function() {
-        $timeout(function () {
-            var scroll_current = $('.holder').scrollLeft();
-            var elems_before = Math.floor(scroll_current / $scope.patchSet_width);
 
-            $scope.display_limits.begin = Math.max(0, elems_before - $scope.margin);
+        var scroll_current = $('.holder').scrollLeft();
+        var elems_before = Math.floor(scroll_current / $scope.patchSet_width);
 
-            $('.table-holder').css('padding-left', $scope.display_limits.begin * $scope.patchSet_width + 'px');
-            $('.thead.fixed').css('padding-left', $scope.display_limits.begin * $scope.patchSet_width + 'px');
-            resizeArrays();
-        }, 0);
+        $scope.display_limits.begin = Math.max(0, elems_before - $scope.margin);
+
+        $('.table-holder').css('padding-left', $scope.display_limits.begin * $scope.patchSet_width + 'px');
+        $('.thead.fixed').css('padding-left', $scope.display_limits.begin * $scope.patchSet_width + 'px');
+        resizeArrays();
+        $scope.$broadcast('suspend');
+        $scope.$digest();
+        $scope.$broadcast('resume');
     })
 
     calibrate();
@@ -285,6 +295,7 @@ gerritmetrix.controller('projectTableCtrl', ['$scope', '$http', '$state', 'Proje
 
         $item['color'] = getRandomColor();
         $item['individual'] = 1;
+        $item['selected'] = 0;
         $item['show_jobs'] = 1;
         $item['rendered'] = 0;
         $scope.authors.push($item);
@@ -673,7 +684,7 @@ gerritmetrix.controller('projectChartCtrl', ['$scope', '$http', '$state', 'Proje
                 var jobs = {}
                 angular.forEach($scope.results[author.username], function(result) {
                     if (typeof jobs[result.job] == 'undefined') {
-                        author.jobs.push({job: result.job, color: getRandomColor()});
+                        author.jobs.push({job: result.job, color: getRandomColor(), selected: false});
                         jobs[result.job] = 1;
                     }
                 })

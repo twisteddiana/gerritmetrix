@@ -75,13 +75,13 @@
         </div>
     </div>
     <div class="box" id="box_holder">
-        <div class="holder" style="overflow-x: scroll">
+        <div class="holder" style="overflow-x: hidden">
             <div class="dummy" style="overflow: hidden" ng-style="{width: patchSet_count * (patchSet_width) + 400 + 'px'}">
                 <div class="table-holder">
                     <div class="thead" ng-style="{width: patchSet_count * (patchSet_width) + 'px'}">
                         <div class="thead_row">
                             <div class="change_left"></div>
-                            <div class="change-header" data-change="{{change[0]}}" ng-style="{width: (patchSet_width) + 'px'}"
+                            <div class="change-header" ng-style="{width: (patchSet_width) + 'px'}"
                                  data-change="{{change[0]}}" data-patchSet="{{change[1]}}"
                                  ng-repeat="change in visible_changes track by change" fa-suspendable
                                  ng-mouseover="loadChangeTooltip(change, $event)" ng-mouseleave="hideTooltip($event)"
