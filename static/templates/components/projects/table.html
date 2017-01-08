@@ -76,21 +76,21 @@
     </div>
     <div class="box" id="box_holder">
         <div class="holder" style="overflow-x: hidden">
-            <div class="dummy" style="overflow: hidden" ng-style="{width: patchSet_count * (patchSet_width) + 400 + 'px'}">
+            <div class="dummy" ng-style="{width: patchSet_count * (patchSet_width) + 400 + 'px'}">
                 <div class="table-holder">
-                    <div class="thead" ng-style="{width: patchSet_count * (patchSet_width) + 'px'}">
+                    <div class="thead">
                         <div class="thead_row">
                             <div class="change_left"></div>
-                            <div class="change-header" ng-style="{width: (patchSet_width) + 'px'}"
-                                 data-change="{{change[0]}}" data-patchSet="{{change[1]}}"
+                            <div class="change-header" ng-style="{width: patchSet_width + 'px'}"
+                                 data-change="{{::change[0]}}" data-patchSet="{{::change[1]}}"
                                  ng-repeat="change in visible_changes track by change" fa-suspendable
                                  ng-mouseover="loadChangeTooltip(change, $event)" ng-mouseleave="hideTooltip($event)"
-                                 popover-title="Change {{change[0]}}" uib-popover popover-trigger="'mouseoverAjax'"
+                                 popover-title="Change {{::change[0]}}"
+                                 uib-popover popover-trigger="'mouseoverAjax'"
                                  uib-popover-template="'changePopoverTemplate.html'" popover-placement="auto top"
                             >
                                 <a ui-sref="app.change({change_number: change[0]})">
-                                    {{change[0]}}<br>{{change[1]}}
-                                </a>
+                                {{::change[0]}}<br>{{::change[1]}}
                             </div>
                         </div>
                     </div>
@@ -104,33 +104,32 @@
                             <div class="patchset-content" ng-style="{width: patchSet_width + 'px'}"
                                  fa-suspendable
                                  ng-repeat="line in visible_author_results[author.username] track by line.id">
-                                <div ng-if="line.total">
-                                    <div class="ci_result result_{{line.change}}_{{line.patchSet}}"
-                                         uib-tooltip-html="line.text" tooltip-append-to-body="'true'"
-                                         data-job="{{author.username}}" data-change="{{line.change}}"
-                                         data-patchSet="{{line.patchSet}}"
-                                    >
-                                        <div ng-bind-html="trustAsHtml(line.item_html)"></div>
-                                    </div>
+                                <div class="ci_result result"
+                                     data-job="{{::author.username}}" data-change="{{::line.change}}"
+                                     data-tooltip="{{::line.text}}"
+                                     data-patchSet="{{::line.patchSet}}"
+                                >
+                                    <div ng-bind-html="::line.item_html"></div>
+                                    <!--uib-tooltip-html="line.text" tooltip-append-to-body="'true'"-->
                                 </div>
                             </div>
                         </div>
                         <div ng-if="author.show_jobs && (!only_selected_jobs || (only_selected_jobs && job.selected))"
                              class="tbody_row" ng-repeat="job in author.jobs track by job.job">
                             <div class="change_left" ng-class="{'selected': job.selected}"
-                                 data-job="{{job.job}}" ng-click="select_job(job.job)">
-                                {{job.job}}
+                                 data-job="{{::job.job}}" ng-click="select_job(job.job)">
+                                {{::job.job}}
                             </div>
                             <div class="patchset-content" ng-style="{width: patchSet_width + 'px'}"
                                  fa-suspendable ng-repeat="line in visible_final_results[author.username][job.job] track by line.id ">
-                                <div ng-if="line.total">
-                                    <div class="ci_result result_{{line.change}}_{{line.patchSet}}"
-                                         uib-tooltip-html="line.text" tooltip-append-to-body="'true'" data-job="{{line.job}}"
-                                         data-change="{{line.change}}" data-patchSet="{{line.patchSet}}"
-                                    >
-                                        <div ng-bind-html="trustAsHtml(line.item_html)"></div>
-                                    </div>
+                                <div class="ci_result"
+                                     data-tooltip="{{::line.text}}"
+                                      data-job="{{::line.job}}"
+                                     data-change="{{::line.change}}" data-patchSet="{{::line.patchSet}}"
+                                >
+                                    <div ng-bind-html="::line.item_html"></div>
                                 </div>
+                                <!-- uib-tooltip-html="line.text" tooltip-append-to-body="'true'"-->
                             </div>
                         </div>
                     </div>

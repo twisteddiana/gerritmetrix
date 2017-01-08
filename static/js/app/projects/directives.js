@@ -210,14 +210,14 @@ gerritmetrix.directive('ciAuthorContent', function($sce, $compile) {
 })
 
 gerritmetrix.component('tableMouseoverScroll', {
-    controller: function($document, $window, $scope) {
-        this.$onInit = function() {
+    controller: function($document, $window, $scope, $timeout) {
+        var init = function() {
             $document.on('mouseover', '.patchset-content .ci_result', function(){
                 var patchset = $(this).data('patchset');
                 var change = $(this).data('change');
                 var job = $(this).data('job');
 
-                $(document).find('.ci_result.result_'+change+'_'+patchset).addClass('hovered');
+                $(document).find('.ci_result[data-change='+change+'][data-patchset='+patchset+']').addClass('hovered');
                 $(document).find('.ci_result[data-job="'+job+'"]').addClass('hovered');
                 $(document).find('.change_left[data-job="'+job+'"]').addClass('hovered');
                 $(document).find('.patchset-header[data-change='+change+'][data-patchset='+patchset+']').addClass('hovered');
@@ -241,7 +241,7 @@ gerritmetrix.component('tableMouseoverScroll', {
                 var change = $(this).data('change');
                 var job = $(this).data('job');
 
-                $(document).find('.ci_result.result_'+change+'_'+patchset).removeClass('hovered');
+                $(document).find('.ci_result[data-change='+change+'][data-patchset='+patchset+']').removeClass('hovered');
                 $(document).find('.ci_result[data-job="'+job+'"]').removeClass('hovered');
                 $(document).find('.change_left[data-job="'+job+'"]').removeClass('hovered');
                 $(document).find('.patchset-header[data-change='+change+'][data-patchset='+patchset+']').removeClass('hovered');
@@ -266,53 +266,69 @@ gerritmetrix.component('tableMouseoverScroll', {
                 $(document).find('.change-header[data-change='+change+']').removeClass('hovered');
             })
 
-
             angular.element($window).bind("scroll", function() {
                     var pos_top = $('.table-holder').offset().top;
                     if ($(window).scrollTop() > pos_top - 70) {
-                        if ($('.table-holder .thead').attr('prev-padding') && !$('.table-holder .thead').hasClass('fixed')) {
-                            $('.table-holder .thead').css('padding-left', $('.table-holder .thead').attr('prev-padding'));
-                        }
                         $('.table-holder .thead').addClass('fixed');
                         $('.sidepatch').removeClass('hidden');
                     } else {
-                        if ($('.table-holder .thead').hasClass('fixed')) {
-                            var padding = $('.table-holder .thead').css('padding-left');
-                            $('.table-holder .thead').attr('prev-padding', padding);
-                        }
-
-                        $('.table-holder .thead').removeClass('fixed').css('padding-left', '0px');
+                        $('.table-holder .thead').removeClass('fixed');
                         $('.sidepatch').addClass('hidden');
                     }
                 }
             )
 
             var extrascroll =  function() {
-                if ($('.holder').scrollLeft() != $('.scroll-holder').scrollLeft()) {
-                    $('.holder').scrollLeft($('.scroll-holder').scrollLeft());
-                }
+                $scope.$emit('haveScrolled', $('.scroll-holder').scrollLeft());
             }
 
-            $('.scroll-holder').scroll(extrascroll)
+            $('.scroll-holder').scroll(extrascroll);
 
-            $('.holder').scroll(function() {
-                var scroll_left = $('.holder').scrollLeft();
-                if ($('.table-holder .thead').hasClass('fixed')) {
-                    $('.table-holder .thead').css('left', scroll_left * -1 + 430 + 'px');
-                }
+            $(document).on('mouseover', '.ci_result', function() {
+                var element = $(this);
+                $timeout(function() {
+                    if (element.is(':hover')) {
+                        var id = element.data('job') + '-' + element.data('change') + '-' + element.data('patchset');
+                        if (!$('#' + id).length) {
+                            var pos = element.offset();
+                            var tooltip = $('<div class="jqtooltip" id="' + id + '">' + element.data('tooltip') + '</div>');
+                            tooltip.css('top', (pos.top + 30) + 'px');
+                            tooltip.css('left', (pos.left + 50 - 130) + 'px');
+                            $('body').prepend(tooltip);
+                        }
+                    }
+                }, 100);
+
+            })
+            $(document).on('mouseout', '.ci_result', function() {
+                var id = $(this).data('job')+'-'+$(this).data('change')+'-'+$(this).data('patchset');
+                $('#'+id).hide().remove();
             })
         }
 
-        this.$onDestroy = function() {
+        var destroy = function() {
             angular.element($window).unbind('scroll');
             $document.off('mouseover', '.patchset-content .ci_result');
             $document.off('mouseover', '.change_left');
             $document.off('mouseout', '.change_left');
             $document.off('mouseout', '.patchset-content .ci_result');
-            $('.holder').off('scroll');
             $('.scroll-holder').off('scroll');
         }
 
+        this.$onInit = function() {
+            init();
+        }
+
+        this.$onDestroy = function() {
+            destroy();
+        }
+
+        $scope.$on('suspend', function () {
+            destroy();
+        })
+        $scope.$on('resume', function() {
+            init();
+        })
     }
 })
 

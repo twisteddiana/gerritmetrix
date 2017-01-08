@@ -45,6 +45,21 @@ function getRandomColor() {
     return color;
 }
 
+function getOffset(elem) {
+    var docElem, win, rect, doc;
+    rect = elem.getBoundingClientRect();
+    if ( rect.width || rect.height || elem.getClientRects().length ) {
+        doc = elem.ownerDocument;
+        win = window;
+        docElem = doc.documentElement;
+
+        return {
+            top: rect.top + win.pageYOffset - docElem.clientTop,
+            left: rect.left + win.pageXOffset - docElem.clientLeft
+        };
+    }
+
+}
 
 gerritmetrix.directive('d3Linechart', ['d3Service', function(d3Service){
     return {

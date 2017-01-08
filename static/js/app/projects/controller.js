@@ -10,7 +10,7 @@ gerritmetrix.controller("projectsCtrl",['$scope', '$http', '$state', 'SweetAlert
     $scope.total_rows = 0;
 
     //calculate available height
-    var height = $(window).height() -  $('.table-list').offset().top - 120;
+    var height = $window.innerHeight -  getOffset(document.getElementsByClassName('table-list')[0]).top - 120;
     var total = Math.floor(height/24);
     $scope.limit = total;
 
@@ -59,7 +59,7 @@ gerritmetrix.controller("projectsCtrl",['$scope', '$http', '$state', 'SweetAlert
     })
 }]);
 
-gerritmetrix.controller('projectViewCtrl', ['$scope', '$http', '$state', 'SweetAlert', 'Projects', '$location', '$stateParams', function($scope, $http, $state, SweetAlert, Projects, $location, $stateParams) {
+gerritmetrix.controller('projectViewCtrl', ['$scope', '$http', '$state', 'SweetAlert', 'Projects', '$location', '$stateParams', '$window', function($scope, $http, $state, SweetAlert, Projects, $location, $stateParams, $window) {
     $scope.title = "Project";
     $scope.project_name = $stateParams.project_name;
     $scope.subtitle = $scope.project_name;
@@ -69,7 +69,7 @@ gerritmetrix.controller('projectViewCtrl', ['$scope', '$http', '$state', 'SweetA
     $scope.total_rows = 0;
 
     //calculate available height
-    var height = $(window).height() -  $('.table-list').offset().top - 70;
+    var height = $window.innerHeight -  getOffset(document.getElementsByClassName('table-list')[0]).top - 120;
     var total = Math.floor(height/24);
     $scope.limit = total;
 
@@ -91,7 +91,7 @@ gerritmetrix.controller('projectViewCtrl', ['$scope', '$http', '$state', 'SweetA
     $scope.getList();
 }])
 
-gerritmetrix.controller('projectTableCtrl', ['$scope', '$http', '$state', 'Projects', '$location', '$stateParams', 'CI', '$timeout', 'Changes', '$sce', function($scope, $http, $state, Projects, $location, $stateParams, CI, $timeout, Changes, $sce) {
+gerritmetrix.controller('projectTableCtrl', ['$scope', '$http', '$state', 'Projects', '$location', '$stateParams', 'CI', '$timeout', 'Changes', '$sce', '$window', function($scope, $http, $state, Projects, $location, $stateParams, CI, $timeout, Changes, $sce, $window) {
     $scope.title = "Project";
     $scope.project_name = $stateParams.project_name;
     $scope.subtitle = $scope.project_name;
@@ -111,10 +111,10 @@ gerritmetrix.controller('projectTableCtrl', ['$scope', '$http', '$state', 'Proje
 
     $scope.select_job = function(job) {
         /*var index = $scope.selected_jobs.indexOf(job);
-        if (index > -1)
-            $scope.selected_jobs.splice(index, 1);
-        else
-            $scope.selected_jobs.push(job);*/
+         if (index > -1)
+         $scope.selected_jobs.splice(index, 1);
+         else
+         $scope.selected_jobs.push(job);*/
         angular.forEach($scope.authors, function(author) {
             if (author.username == job) {
                 author.selected = !author.selected;
@@ -130,7 +130,7 @@ gerritmetrix.controller('projectTableCtrl', ['$scope', '$http', '$state', 'Proje
     $scope.final_results = {};
     $scope.author_result = {};
     $scope.patchSet_width = 50;
-    $scope.margin = 10;
+    $scope.margin = 0;
 
     //the visible ones
     $scope.visible_changes = []
@@ -150,7 +150,7 @@ gerritmetrix.controller('projectTableCtrl', ['$scope', '$http', '$state', 'Proje
     }
 
     var calibrate = function() {
-        var total_width = $('#box_holder').width() - 30 - 400;
+        var total_width = document.getElementById('box_holder').clientWidth - 30 - 400;
         var displayed_elements = Math.ceil(total_width / $scope.patchSet_width);
 
         if (typeof $scope.display_limits == 'undefined')
@@ -177,28 +177,23 @@ gerritmetrix.controller('projectTableCtrl', ['$scope', '$http', '$state', 'Proje
                         $scope.change_tooltips[change].date = patchSet.patchSet.createdOn;
                     }
                 })
-                if ($($event.currentTarget).is(':hover'))
-                    $($event.currentTarget).trigger('mouseoverAjax');
+                if (angular.element($event.currentTarget).is(':hover'))
+                    angular.element($event.currentTarget).trigger('mouseoverAjax');
             })
         } else {
-            $($event.currentTarget).trigger('mouseoverAjax');
+            angular.element($event.currentTarget).trigger('mouseoverAjax');
         }
     }
 
     $scope.hideTooltip = function($event) {
-        $($event.target).trigger('mouseleaveAjax');
+        angular.element($event.target).trigger('mouseleaveAjax');
     }
 
-
-    $('.holder').scroll(function() {
-
-        var scroll_current = $('.holder').scrollLeft();
-        var elems_before = Math.floor(scroll_current / $scope.patchSet_width);
+    $scope.$on('haveScrolled', function(event, scroll) {
+        var elems_before = Math.floor(scroll / $scope.patchSet_width);
 
         $scope.display_limits.begin = Math.max(0, elems_before - $scope.margin);
 
-        $('.table-holder').css('padding-left', $scope.display_limits.begin * $scope.patchSet_width + 'px');
-        $('.thead.fixed').css('padding-left', $scope.display_limits.begin * $scope.patchSet_width + 'px');
         resizeArrays();
         $scope.$broadcast('suspend');
         $scope.$digest();
@@ -206,7 +201,7 @@ gerritmetrix.controller('projectTableCtrl', ['$scope', '$http', '$state', 'Proje
     })
 
     calibrate();
-    $(window).resize(function() {
+    angular.element($window).on('resize', function() {
         calibrate();
     })
 
@@ -450,7 +445,7 @@ gerritmetrix.controller('projectTableCtrl', ['$scope', '$http', '$state', 'Proje
                 }
 
                 var result_item = {
-                    item_html: item_html,
+                    item_html: $sce.trustAsHtml(item_html),
                     total: total,
                     text: text,
                     change: change,
@@ -463,7 +458,7 @@ gerritmetrix.controller('projectTableCtrl', ['$scope', '$http', '$state', 'Proje
 
                 if (draw_author_line) {
                     var result_item_author = {
-                        item_html: item_html_author,
+                        item_html: $sce.trustAsHtml(item_html_author),
                         total: total,
                         text: text_author,
                         change: change,

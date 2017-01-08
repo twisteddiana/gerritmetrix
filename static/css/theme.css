@@ -520,6 +520,7 @@ ul.pagination {
     position: fixed;
     top: 50px;
     z-index: 5;
+    width: 100%;
 }
 
 .table-holder .thead.fixed > div {
@@ -674,4 +675,19 @@ ul.pagination {
     font-family: "Exo 2";
     max-height: 150px;
     overflow: hidden;
+}
+
+.jqtooltip {
+    position: absolute;
+    z-index: 100;
+    background: #fff;
+    padding: 10px;
+    font-size: 11px;
+    width: 270px;
+    border-radius: 3px;
+    border:1px solid #ccc;
+}
+
+.jqtooltip p:last-child {
+    margin-bottom: 0;
 }
