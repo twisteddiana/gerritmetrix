@@ -686,6 +686,7 @@ ul.pagination {
     width: 270px;
     border-radius: 3px;
     border:1px solid #ccc;
+    opacity: 0;
 }
 
 .jqtooltip p:last-child {

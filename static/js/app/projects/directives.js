@@ -292,9 +292,26 @@ gerritmetrix.component('tableMouseoverScroll', {
                         if (!$('#' + id).length) {
                             var pos = element.offset();
                             var tooltip = $('<div class="jqtooltip" id="' + id + '">' + element.data('tooltip') + '</div>');
-                            tooltip.css('top', (pos.top + 30) + 'px');
-                            tooltip.css('left', (pos.left + 50 - 130) + 'px');
                             $('body').prepend(tooltip);
+
+                            var t_height = tooltip.height() + 30;
+                            var t_width = tooltip.width() + 30;
+
+                            var w_width = $(window).width() - 30;
+
+                            var top = pos.top + element.height() + 10;
+                            if (top + t_height > $(window).height() - 30) {
+                                top = pos.top - t_height;
+                            }
+                            var left = pos.left + element.width() / 2 - t_width / 2;
+
+                            if (left + t_width > w_width) {
+                                left = w_width - t_width;
+                            }
+                            tooltip.css('top', top + 'px');
+                            tooltip.css('left', left + 'px');
+
+                            tooltip.css('opacity', 1);
                         }
                     }
                 }, 100);
@@ -302,7 +319,7 @@ gerritmetrix.component('tableMouseoverScroll', {
             })
             $(document).on('mouseout', '.ci_result', function() {
                 var id = $(this).data('job')+'-'+$(this).data('change')+'-'+$(this).data('patchset');
-                $('#'+id).hide().remove();
+                $('#'+id).remove();
             })
         }
 
@@ -323,12 +340,12 @@ gerritmetrix.component('tableMouseoverScroll', {
             destroy();
         }
 
-        $scope.$on('suspend', function () {
+        /*$scope.$on('suspend', function () {
             destroy();
         })
         $scope.$on('resume', function() {
             init();
-        })
+        })*/
     }
 })
 

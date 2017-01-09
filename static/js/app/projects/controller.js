@@ -150,8 +150,16 @@ gerritmetrix.controller('projectTableCtrl', ['$scope', '$http', '$state', 'Proje
     }
 
     var calibrate = function() {
-        var total_width = document.getElementById('box_holder').clientWidth - 30 - 400;
-        var displayed_elements = Math.ceil(total_width / $scope.patchSet_width);
+        var total_width = $('#box_holder').width() - 30 - $('.change_left').width();
+        var partial_displayed = total_width / $scope.patchSet_width;
+        var dec = partial_displayed * 10 % 10;
+        if (dec > 5) {
+            var displayed_elements = Math.ceil(partial_displayed);
+        } else {
+            var displayed_elements = Math.floor(partial_displayed);
+        }
+
+        $scope.patchSet_width = total_width / displayed_elements;
 
         if (typeof $scope.display_limits == 'undefined')
             $scope.display_limits = {
