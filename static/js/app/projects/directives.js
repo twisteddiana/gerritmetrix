@@ -300,7 +300,7 @@ gerritmetrix.component('tableMouseoverScroll', {
                             var w_width = $(window).width() - 30;
 
                             var top = pos.top + element.height() + 10;
-                            if (top + t_height > $(window).height() - 30) {
+                            if (top + t_height > $(window).height() + $(window).scrollTop() - 30) {
                                 top = pos.top - t_height;
                             }
                             var left = pos.left + element.width() / 2 - t_width / 2;
