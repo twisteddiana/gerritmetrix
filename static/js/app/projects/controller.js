@@ -91,7 +91,7 @@ gerritmetrix.controller('projectViewCtrl', ['$scope', '$http', '$state', 'SweetA
     $scope.getList();
 }])
 
-gerritmetrix.controller('projectTableCtrl', ['$scope', '$http', '$state', 'Projects', '$location', '$stateParams', 'CI', '$timeout', 'Changes', '$sce', '$window', function($scope, $http, $state, Projects, $location, $stateParams, CI, $timeout, Changes, $sce, $window) {
+gerritmetrix.controller('projectTableCtrl', ['$scope', '$http', '$state', 'Projects', '$location', '$stateParams', 'CI', '$timeout', 'Changes', '$sce', '$window', '$filter', function($scope, $http, $state, Projects, $location, $stateParams, CI, $timeout, Changes, $sce, $window, $filter) {
     $scope.title = "Project";
     $scope.project_name = $stateParams.project_name;
     $scope.subtitle = $scope.project_name;
@@ -99,9 +99,21 @@ gerritmetrix.controller('projectTableCtrl', ['$scope', '$http', '$state', 'Proje
     $scope.results = {};
     $scope.changes = [];
     $scope.interval = "7";
+
+    if (typeof $location.search().interval != 'undefined')
+        $scope.interval = $location.search().interval;
+
     $scope.dates = {
         start: getTimestamp($scope.interval),
         end: Math.floor(Date.now() / 1000)
+    }
+
+    if ($scope.interval == 0) {
+        $scope.dates.start = Math.floor(new Date($location.search().date_from) / 100);
+        $scope.dates.end = Math.floor(new Date($location.search().date_to) / 1000);
+
+        $scope.datepickerFrom = new Date($location.search().date_from);
+        $scope.datepickerTo = new Date($location.search().date_to);
     }
 
     $scope.change_tooltips = {};
@@ -110,11 +122,6 @@ gerritmetrix.controller('projectTableCtrl', ['$scope', '$http', '$state', 'Proje
     $scope.selected_jobs = [];
 
     $scope.select_job = function(job) {
-        /*var index = $scope.selected_jobs.indexOf(job);
-         if (index > -1)
-         $scope.selected_jobs.splice(index, 1);
-         else
-         $scope.selected_jobs.push(job);*/
         angular.forEach($scope.authors, function(author) {
             if (author.username == job) {
                 author.selected = !author.selected;
@@ -129,8 +136,13 @@ gerritmetrix.controller('projectTableCtrl', ['$scope', '$http', '$state', 'Proje
 
     $scope.final_results = {};
     $scope.author_result = {};
-    $scope.patchSet_width = 25;
-    $scope.margin = 0;
+
+    $scope.standard_width = {
+        full: 50,
+        compact: 25
+    }
+
+    $scope.patchSet_width = $scope.standard_width.full;
 
     //the visible ones
     $scope.visible_changes = []
@@ -163,14 +175,23 @@ gerritmetrix.controller('projectTableCtrl', ['$scope', '$http', '$state', 'Proje
 
         if (typeof $scope.display_limits == 'undefined')
             $scope.display_limits = {
-                limit: displayed_elements + 2 * $scope.margin,
+                limit: displayed_elements,
                 begin: 0
             }
         else {
-            $scope.display_limits.limit = displayed_elements + 2 * $scope.margin;
+            $scope.display_limits.limit = displayed_elements;
         }
 
         resizeArrays();
+    }
+
+    $scope.switchView = function() {
+        if ($scope.compact_view)
+            $scope.patchSet_width = $scope.standard_width.compact;
+        else
+            $scope.patchSet_width = $scope.standard_width.full;
+
+        calibrate();
     }
 
     $scope.loadChangeTooltip = function(change, $event) {
@@ -200,7 +221,7 @@ gerritmetrix.controller('projectTableCtrl', ['$scope', '$http', '$state', 'Proje
     $scope.$on('haveScrolled', function(event, scroll) {
         var elems_before = Math.floor(scroll / $scope.patchSet_width);
 
-        $scope.display_limits.begin = Math.max(0, elems_before - $scope.margin);
+        $scope.display_limits.begin = Math.max(0, elems_before);
 
         resizeArrays();
         $scope.$broadcast('suspend');
@@ -324,10 +345,14 @@ gerritmetrix.controller('projectTableCtrl', ['$scope', '$http', '$state', 'Proje
             $scope.dates.start = getTimestamp($scope.interval);
             $scope.dates.end = Math.floor(Date.now() / 1000);
             $scope.getAllValues();
+            $location.search('date_from', null);
+            $location.search('date_to', null);
         }
         else {
             //watch for dates
         }
+
+        $location.search('interval', $scope.interval);
     }
 
     $scope.$watchGroup(['datepickerFrom', 'datepickerTo'], function() {
@@ -336,8 +361,11 @@ gerritmetrix.controller('projectTableCtrl', ['$scope', '$http', '$state', 'Proje
         if (typeof $scope.datepickerTo != 'undefined')
             $scope.dates.end = Math.floor($scope.datepickerTo.getTime() / 1000) + 86400;
 
-        if (typeof $scope.datepickerFrom != 'undefined' && typeof $scope.datepickerTo != 'undefined')
+        if (typeof $scope.datepickerFrom != 'undefined' && typeof $scope.datepickerTo != 'undefined') {
             $scope.getAllValues();
+            $location.search('date_from', $filter('date')($scope.datepickerFrom, 'yyyy-MM-dd'));
+            $location.search('date_to', $filter('date')($scope.datepickerTo, 'yyyy-MM-dd'));
+        }
     })
 
     $scope.processResults = function(author) {

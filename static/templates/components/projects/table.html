@@ -17,6 +17,9 @@
                 Filtering:
                 <strong ng-if="!only_selected_jobs">Showing all jobs</strong>
                 <strong ng-if="only_selected_jobs">Showing only selected jobs</strong>
+
+                <strong ng-if="!compact_view">Normal view</strong>
+                <strong ng-if="compact_view">Compact view</strong>
             </div>
             <div class="collapser"><i class="fa" ng-class="{'fa-chevron-up': !settingsCollapsed, 'fa-chevron-down': settingsCollapsed}"></i></div>
         </div>
@@ -46,7 +49,7 @@
                     </div>
 
                 </div>
-                <div class="col-lg-7">
+                <div class="col-lg-5">
                     <ul class="ci-list" ui-sortable ng-model="authors">
                         <li ng-repeat="author in authors">
                             <span class="author-name">{{author.name}}</span>
@@ -64,10 +67,15 @@
                     <div ng-show="noResults">
                         <i class="fa fa-times"></i> No Results Found
                     </div>
-                    <br>
-                    <button class="btn btn-green btn-sm" ng-model="only_selected_jobs" uib-btn-checkbox btn-checkbox-true="true" btn-checkbox-false="false">
+                </div>
+                <div class="col-lg-2">
+                     <button class="btn btn-green btn-sm" ng-model="only_selected_jobs" uib-btn-checkbox btn-checkbox-true="true" btn-checkbox-false="false">
                         <span ng-if="!only_selected_jobs">Show only selected jobs</span>
                         <span ng-if="only_selected_jobs">Show all jobs</span>
+                    </button>
+                    <button class="btn btn-purple btn-sm" ng-click="switchView()" ng-model="compact_view" uib-btn-checkbox btn-checkbox-true="true" btn-checkbox-false="false">
+                        <span ng-if="!compact_view">Normal view</span>
+                        <span ng-if="compact_view">Compact view</span>
                     </button>
                 </div>
 
