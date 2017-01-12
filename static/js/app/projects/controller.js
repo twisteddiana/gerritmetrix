@@ -129,7 +129,7 @@ gerritmetrix.controller('projectTableCtrl', ['$scope', '$http', '$state', 'Proje
 
     $scope.final_results = {};
     $scope.author_result = {};
-    $scope.patchSet_width = 50;
+    $scope.patchSet_width = 25;
     $scope.margin = 0;
 
     //the visible ones

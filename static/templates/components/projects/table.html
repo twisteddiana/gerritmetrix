@@ -104,14 +104,12 @@
                             </div>
                             <div class="patchset-content" ng-style="{width: patchSet_width + 'px'}"
                                  fa-suspendable
-                                 ng-repeat="line in visible_author_results[author.username] track by line.id">
-                                <div class="ci_result result"
-                                     data-job="{{::author.username}}" data-change="{{::line.change}}"
-                                     data-tooltip="{{::line.text}}"
-                                     data-patchSet="{{::line.patchSet}}"
-                                >
+                                 ng-repeat="line in visible_author_results[author.username] track by line.id"
+                                 data-job="{{::author.username}}" data-change="{{::line.change}}"
+                                 data-tooltip="{{::line.text}}" data-patchSet="{{::line.patchSet}}"
+                            >
+                                <div class="ci_result">
                                     <div ng-bind-html="::line.item_html"></div>
-                                    <!--uib-tooltip-html="line.text" tooltip-append-to-body="'true'"-->
                                 </div>
                             </div>
                         </div>
@@ -122,15 +120,14 @@
                                 {{::job.job}}
                             </div>
                             <div class="patchset-content" ng-style="{width: patchSet_width + 'px'}"
-                                 fa-suspendable ng-repeat="line in visible_final_results[author.username][job.job] track by line.id ">
-                                <div class="ci_result"
-                                     data-tooltip="{{::line.text}}"
-                                      data-job="{{::line.job}}"
-                                     data-change="{{::line.change}}" data-patchSet="{{::line.patchSet}}"
-                                >
+                                 fa-suspendable
+                                 ng-repeat="line in visible_final_results[author.username][job.job] track by line.id "
+                                 data-tooltip="{{::line.text}}" data-job="{{::line.job}}" data-change="{{::line.change}}"
+                                 data-patchSet="{{::line.patchSet}}"
+                            >
+                                <div class="ci_result">
                                     <div ng-bind-html="::line.item_html"></div>
                                 </div>
-                                <!-- uib-tooltip-html="line.text" tooltip-append-to-body="'true'"-->
                             </div>
                         </div>
                     </div>

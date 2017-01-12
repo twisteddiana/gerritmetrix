@@ -212,43 +212,43 @@ gerritmetrix.directive('ciAuthorContent', function($sce, $compile) {
 gerritmetrix.component('tableMouseoverScroll', {
     controller: function($document, $window, $scope, $timeout) {
         var init = function() {
-            $document.on('mouseover', '.patchset-content .ci_result', function(){
+            $(document).on('mouseover', '.patchset-content', function(){
                 var patchset = $(this).data('patchset');
                 var change = $(this).data('change');
                 var job = $(this).data('job');
 
-                $(document).find('.ci_result[data-change='+change+'][data-patchset='+patchset+']').addClass('hovered');
-                $(document).find('.ci_result[data-job="'+job+'"]').addClass('hovered');
+                $(document).find('.patchset-content[data-change='+change+'][data-patchset='+patchset+']').addClass('hovered');
+                $(document).find('.patchset-content[data-job="'+job+'"]').addClass('hovered');
                 $(document).find('.change_left[data-job="'+job+'"]').addClass('hovered');
                 $(document).find('.patchset-header[data-change='+change+'][data-patchset='+patchset+']').addClass('hovered');
                 $(document).find('.change-header[data-change='+change+']').addClass('hovered');
             })
 
-            $document.on('mouseover', '.change_left', function() {
+            $(document).on('mouseover', '.change_left', function() {
                 var job = $(this).data('job');
                 $(this).addClass('hovered');
                 $(document).find('.ci_result[data-job="'+job+'"]').addClass('hovered');
             })
 
-            $document.on('mouseout', '.change_left', function() {
+            $(document).on('mouseout', '.change_left', function() {
                 var job = $(this).data('job');
                 $(this).removeClass('hovered');
                 $(document).find('.ci_result[data-job="'+job+'"]').removeClass('hovered');
             })
 
-            $document.on('mouseout', '.patchset-content .ci_result', function(){
+            $(document).on('mouseout', '.patchset-content', function(){
                 var patchset = $(this).data('patchset');
                 var change = $(this).data('change');
                 var job = $(this).data('job');
 
-                $(document).find('.ci_result[data-change='+change+'][data-patchset='+patchset+']').removeClass('hovered');
-                $(document).find('.ci_result[data-job="'+job+'"]').removeClass('hovered');
+                $(document).find('.patchset-content[data-change='+change+'][data-patchset='+patchset+']').removeClass('hovered');
+                $(document).find('.patchset-content[data-job="'+job+'"]').removeClass('hovered');
                 $(document).find('.change_left[data-job="'+job+'"]').removeClass('hovered');
                 $(document).find('.patchset-header[data-change='+change+'][data-patchset='+patchset+']').removeClass('hovered');
                 $(document).find('.change-header[data-change='+change+']').removeClass('hovered');
             })
 
-            $document.on('mouseover', '.change-header, .patchset-header', function() {
+            $(document).on('mouseover', '.change-header, .patchset-header', function() {
                 var patchset = $(this).data('patchset');
                 var change = $(this).data('change');
 
@@ -257,7 +257,7 @@ gerritmetrix.component('tableMouseoverScroll', {
                 $(document).find('.change-header[data-change='+change+']').addClass('hovered');
             })
 
-            $document.on('mouseout', '.change-header, .patchset-header', function() {
+            $(document).on('mouseout', '.change-header, .patchset-header', function() {
                 var patchset = $(this).data('patchset');
                 var change = $(this).data('change');
 
@@ -266,7 +266,7 @@ gerritmetrix.component('tableMouseoverScroll', {
                 $(document).find('.change-header[data-change='+change+']').removeClass('hovered');
             })
 
-            angular.element($window).bind("scroll", function() {
+            $(window).on("scroll", function() {
                     var pos_top = $('.table-holder').offset().top;
                     if ($(window).scrollTop() > pos_top - 70) {
                         $('.table-holder .thead').addClass('fixed');
@@ -284,7 +284,7 @@ gerritmetrix.component('tableMouseoverScroll', {
 
             $('.scroll-holder').scroll(extrascroll);
 
-            $(document).on('mouseover', '.ci_result', function() {
+            $(document).on('mouseover', '.patchset-content', function() {
                 var element = $(this);
                 $timeout(function() {
                     if (element.is(':hover')) {
@@ -317,18 +317,24 @@ gerritmetrix.component('tableMouseoverScroll', {
                 }, 100);
 
             })
-            $(document).on('mouseout', '.ci_result', function() {
-                var id = $(this).data('job')+'-'+$(this).data('change')+'-'+$(this).data('patchset');
-                $('#'+id).remove();
+            $(document).on('mouseout', '.patchset-content', function() {
+                var element = $(this);
+                $timeout(function() {
+                    if (!element.is(':hover')) {
+                        var id = element.data('job') + '-' + element.data('change') + '-' + element.data('patchset');
+                        $('#' + id).remove();
+                    }
+                }, 50);
+
             })
         }
 
         var destroy = function() {
-            angular.element($window).unbind('scroll');
-            $document.off('mouseover', '.patchset-content .ci_result');
-            $document.off('mouseover', '.change_left');
-            $document.off('mouseout', '.change_left');
-            $document.off('mouseout', '.patchset-content .ci_result');
+            $('window').off('scroll');
+            $(document).off('mouseover', '.patchset-content');
+            $(document).off('mouseover', '.change_left');
+            $(document).off('mouseout', '.change_left');
+            $(document).off('mouseout', '.patchset-content');
             $('.scroll-holder').off('scroll');
         }
 
@@ -341,11 +347,11 @@ gerritmetrix.component('tableMouseoverScroll', {
         }
 
         /*$scope.$on('suspend', function () {
-            destroy();
-        })
-        $scope.$on('resume', function() {
-            init();
-        })*/
+         destroy();
+         })
+         $scope.$on('resume', function() {
+         init();
+         })*/
     }
 })
 
