@@ -95,10 +95,28 @@ gerritmetrix.controller('projectTableCtrl', ['$scope', '$http', '$state', 'Proje
     $scope.title = "Project";
     $scope.project_name = $stateParams.project_name;
     $scope.subtitle = $scope.project_name;
-    $scope.authors = [{name: 'Jenkins', username: 'jenkins', color: getRandomColor(), individual: 1,  show_jobs: 1, rendered: 0}]
+    $scope.authors = [{name: 'Jenkins', username: 'jenkins', individual: 1,  show_jobs: 1}]
     $scope.results = {};
     $scope.changes = [];
     $scope.interval = "7";
+    $scope.final_results = {};
+    $scope.author_result = {};
+    $scope.change_tooltips = {};
+
+    $scope.only_selected_jobs = false;
+    $scope.selected_jobs = [];
+
+     //the visible ones
+    $scope.visible_changes = [];
+    $scope.visible_author_results = [];
+    $scope.visible_final_results = [];
+
+    $scope.standard_width = {
+        full: 50,
+        compact: 25
+    };
+    $scope.patchSet_width = $scope.standard_width.full;
+
 
     if (typeof $location.search().interval != 'undefined')
         $scope.interval = $location.search().interval;
@@ -116,11 +134,6 @@ gerritmetrix.controller('projectTableCtrl', ['$scope', '$http', '$state', 'Proje
         $scope.datepickerTo = new Date($location.search().date_to);
     }
 
-    $scope.change_tooltips = {};
-
-    $scope.only_selected_jobs = false;
-    $scope.selected_jobs = [];
-
     $scope.select_job = function(job) {
         angular.forEach($scope.authors, function(author) {
             if (author.username == job) {
@@ -131,33 +144,6 @@ gerritmetrix.controller('projectTableCtrl', ['$scope', '$http', '$state', 'Proje
                         _job.selected = !_job.selected;
                 })
             }
-        })
-    }
-
-    $scope.final_results = {};
-    $scope.author_result = {};
-
-    $scope.standard_width = {
-        full: 50,
-        compact: 25
-    }
-
-    $scope.patchSet_width = $scope.standard_width.full;
-
-    //the visible ones
-    $scope.visible_changes = []
-    $scope.visible_author_results = []
-    $scope.visible_final_results = []
-
-    var resizeArrays = function() {
-        //update visible
-        $scope.visible_changes = $scope.changes.slice($scope.display_limits.begin, $scope.display_limits.begin + $scope.display_limits.limit);
-        angular.forEach($scope.author_result, function(results, author) {
-            $scope.visible_author_results[author] = results.slice($scope.display_limits.begin, $scope.display_limits.begin + $scope.display_limits.limit);
-            $scope.visible_final_results[author] = {}
-            angular.forEach($scope.final_results[author], function(results, job) {
-                $scope.visible_final_results[author][job] = results.slice($scope.display_limits.begin, $scope.display_limits.begin + $scope.display_limits.limit);
-            })
         })
     }
 
@@ -182,7 +168,7 @@ gerritmetrix.controller('projectTableCtrl', ['$scope', '$http', '$state', 'Proje
             $scope.display_limits.limit = displayed_elements;
         }
 
-        resizeArrays();
+        Projects.resizeArrays($scope);
     }
 
     $scope.switchView = function() {
@@ -223,7 +209,7 @@ gerritmetrix.controller('projectTableCtrl', ['$scope', '$http', '$state', 'Proje
 
         $scope.display_limits.begin = Math.max(0, elems_before);
 
-        resizeArrays();
+        Projects.resizeArrays($scope);
         $scope.$broadcast('suspend');
         $scope.$digest();
         $scope.$broadcast('resume');
@@ -233,10 +219,6 @@ gerritmetrix.controller('projectTableCtrl', ['$scope', '$http', '$state', 'Proje
     angular.element($window).on('resize', function() {
         calibrate();
     })
-
-    $scope.updateAuthor = function(author) {
-        //$scope.getValues(author);
-    }
 
     $scope.generateQueryParams = function(author) {
 
@@ -257,8 +239,6 @@ gerritmetrix.controller('projectTableCtrl', ['$scope', '$http', '$state', 'Proje
 
         return obj;
     }
-
-    var loaded = 0;
 
     $scope.getAllValues = function() {
         $scope.changes = {};
@@ -293,8 +273,8 @@ gerritmetrix.controller('projectTableCtrl', ['$scope', '$http', '$state', 'Proje
                 $scope.patchSet_count = $scope.changes.length;
             }
 
-            $scope.processResults(author);
-            resizeArrays();
+            Projects.processResults(author, $scope);
+            Projects.resizeArrays($scope);
         })
     }
 
@@ -306,10 +286,10 @@ gerritmetrix.controller('projectTableCtrl', ['$scope', '$http', '$state', 'Proje
         })
     }
 
-    $scope.authorSelect = function($item) {
+    $scope.authorSelect = function(_author) {
         var found = false;
         angular.forEach($scope.authors, function(author) {
-            if (author.username == $item.username)
+            if (author.username == _author.username)
                 found = true;
         })
 
@@ -317,27 +297,55 @@ gerritmetrix.controller('projectTableCtrl', ['$scope', '$http', '$state', 'Proje
             return;
         }
 
-        $item['color'] = getRandomColor();
-        $item['individual'] = 1;
-        $item['selected'] = 0;
-        $item['show_jobs'] = 1;
-        $item['rendered'] = 0;
-        $scope.authors.push($item);
+        _author['individual'] = 1;
+        _author['selected'] = 0;
+        _author['show_jobs'] = 1;
+        _author['rendered'] = 0;
+        $scope.authors.push(_author);
         $scope.authorSearch = '';
-        $scope.getValues($item);
+        $scope.getValues(_author);
+
+        //add the location
+        if (typeof $location.search().authors == 'undefined') {
+            var list = []
+            angular.forEach($scope.authors, function(author) {
+                list.push(author.username);
+            })
+            $location.search('authors', list.join(','));
+        }
+        else {
+            var list = $location.search().authors.split(',');
+            if (list.indexOf(_author.username) == -1)
+                list.push(_author.username);
+            $location.search('authors', list.join(','));
+        }
     }
 
-    $scope.getAllValues();
+    if (typeof $location.search().authors != 'undefined') {
+        var authors = $location.search().authors.split(',');
+        angular.forEach(authors, function(piece) {
+            var result = $scope.searchAuthor(piece).then(function (results) {
+               angular.forEach(results, function(result) {
+                   if (result.username == piece)
+                       $scope.authorSelect(result);
+               })
+            });
+        })
+    }
 
     $scope.removeAuthor = function(author) {
         var index = $scope.authors.indexOf(author);
         $scope.authors.splice(index, 1);
         delete $scope.results[author.username];
-        $scope.processResults();
-    }
-
-    $scope.tickChanged = function() {
-        $scope.processResults();
+        delete $scope.final_results[author.username];
+        delete $scope.visible_final_results[author.username];
+        delete $scope.visible_author_results[author.username];
+        if (typeof $location.search().authors != 'undefined') {
+             var list = $location.search().authors.split(',');
+             var index = list.indexOf(author.username);
+             list.splice(index, 1);
+             $location.search('authors', list.join(','));
+        }
     }
 
     $scope.intervalChanged = function() {
@@ -368,155 +376,6 @@ gerritmetrix.controller('projectTableCtrl', ['$scope', '$http', '$state', 'Proje
         }
     })
 
-    $scope.processResults = function(author) {
-
-        var final_results = {};
-        var author_results = {}
-        angular.forEach(author.jobs, function(job) {
-            final_results[job.job] = {}
-            angular.forEach($scope.changes, function(change_arr) {
-                if (typeof final_results[job.job][change_arr[0]] == 'undefined')
-                    final_results[job.job][change_arr[0]] = {}
-                if (typeof final_results[job.job][change_arr[0]][change_arr[1]] == 'undefined')
-                    final_results[job.job][change_arr[0]][change_arr[1]] = []
-
-                author_results[change_arr] = {
-                    item_html: '',
-                    total: 0,
-                    text: '<div>No results</div>',
-                    change: change_arr[0],
-                    patchSet: change_arr[1],
-                    id: change_arr[0] + '_' + change_arr[1]
-                };
-            })
-        })
-
-        angular.forEach($scope.results[author.username], function(result) {
-            if (typeof result.result == 'undefined')
-                result.result = 0;
-            final_results[result.job][result.number][result.patchSet].push({build_result: result.build_result, result: result.result, date: result.checkedOn})
-        })
-
-        var extra_final_results = {}
-
-        angular.forEach(author.jobs, function(job) {
-            var linear = [];
-
-            angular.forEach($scope.changes, function (change_arr) {
-                var change = change_arr[0];
-                var patchSet = change_arr[1];
-
-                var total = final_results[job.job][change][patchSet].length;
-
-                var text = "<div>";
-                var item_html = "";
-
-                var draw_author_line = false;
-                if (author_results[change_arr].total == 0) {
-                    var text_author = "<div>";
-                    var item_html_author = "";
-                    draw_author_line = true;
-                }
-
-                angular.forEach(final_results[job.job][change][patchSet], function (result) {
-                    var class_name = '';
-                    if (result.result == null || result.result.toLowerCase().indexOf('fail') == 0) {
-                        class_name = 'fraction-fail';
-                    }
-                    else if (result.result.toLowerCase().indexOf('succ') == 0) {
-                        class_name = 'fraction-success';
-                    }
-                    else {
-                        class_name = 'fraction-other';
-                    }
-
-                    var date = new Date(result.date * 1000);
-                    text += '<p> Result <b>' + result.result + '</b> at ' + date.toUTCString() + '</p>';
-                    item_html += '<div class="fraction ' + class_name + '" style="width: ' + 100 / total + '%"></div>';
-
-                    if (draw_author_line) {
-                        var class_name = '';
-                        if (result.build_result == null || result.build_result.indexOf('fail') == 0) {
-                            class_name = 'fraction-fail';
-                        }
-                        else if (result.build_result.indexOf('succ') == 0) {
-                            class_name = 'fraction-success';
-                        }
-                        else {
-                            class_name = 'fraction-other';
-                        }
-
-                        var date = new Date(result.date * 1000);
-                        text_author += '<p> Build result <b>'+ result.build_result +'</b> at ' + date.toUTCString() + '</p>';
-
-                        item_html_author += '<div class="fraction '+class_name+'" style="width: '+ 100 / total +'%"></div>'
-                    }
-                })
-
-                if (total == 0)
-                    text += 'No results';
-                else {
-                    var head_text = '';
-                    if (total > 2)
-                        head_text = '<p>' + (total - 1) + ' rechecks</p>';
-                    else if (total == 2)
-                        head_text = '<p>1 recheck</p>';
-
-                    text = text.replace('<div>', '<div>' + head_text);
-                }
-
-                text += '</div>';
-
-                if (draw_author_line && total > 0) {
-                    var head_text = '';
-                    if (total > 2)
-                        head_text = '<p>'+ (total - 1) + ' rechecks</p>';
-                    else if (total == 2)
-                        head_text = '<p>1 recheck</p>';
-
-                    text_author = text_author.replace('<div>', '<div>' + head_text);
-                    text_author += '</div>';
-                } else {
-                    draw_author_line = false;
-                }
-
-                var result_item = {
-                    item_html: $sce.trustAsHtml(item_html),
-                    total: total,
-                    text: text,
-                    change: change,
-                    patchSet: patchSet,
-                    job: job.job,
-                    id: change + '_' + patchSet
-                }
-
-                linear.push(result_item);
-
-                if (draw_author_line) {
-                    var result_item_author = {
-                        item_html: $sce.trustAsHtml(item_html_author),
-                        total: total,
-                        text: text_author,
-                        change: change,
-                        patchSet: patchSet,
-                        id: change + '_' + patchSet
-                    }
-
-                    author_results[change_arr] = result_item_author;
-                }
-            })
-
-            extra_final_results[job.job] = linear;
-        })
-
-        $scope.final_results[author.username] = extra_final_results;
-        var linear_author = [];
-        angular.forEach(author_results, function(result) {
-            linear_author.push(result);
-        })
-        $scope.author_result[author.username] = linear_author;
-    }
-
     function getTimestamp(days) {
         var oneWeekAgo = new Date();
         oneWeekAgo.setDate(oneWeekAgo.getDate() - days);
@@ -526,6 +385,8 @@ gerritmetrix.controller('projectTableCtrl', ['$scope', '$http', '$state', 'Proje
     $scope.trustAsHtml = function(html) {
         return $sce.trustAsHtml(html);
     }
+
+    $scope.getAllValues();
 }])
 
 gerritmetrix.controller('projectChartCtrl', ['$scope', '$http', '$state', 'Projects', '$location', '$stateParams', 'CI', function($scope, $http, $state, Projects, $location, $stateParams, CI) {
