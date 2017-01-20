@@ -2,7 +2,7 @@ html {
     overflow-y: scroll;
 }
 html, body {
-    font-family: "Exo 2";
+    font-family: Arial;
     height: 100%;
     background: #e9ecf3;
     font-size: 12px;
