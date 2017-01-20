@@ -140,8 +140,14 @@ class ProjectChartHandler(tornado.web.RequestHandler):
         else:
             changes = (params['changes_list'], [])
 
+        res = yield cibucket.get_check_results_view(params['project'], params['author'],
+                                                    params['start'], params['end'])
+
         if changes[0]:
-            events = yield cibucket.get_check_result(params['project'], changes[0], params['author'], params['individual'])
+            # events = yield cibucket.get_check_result(params['project'], changes[0], params['author'],
+            #                                          params['individual'], params['start'])
+            events = yield cibucket.get_check_results_view(params['project'], params['author'],
+                                                    params['start'], params['end'])
         else:
             events = ([],[])
 

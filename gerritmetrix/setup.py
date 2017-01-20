@@ -54,3 +54,32 @@ design = {
     }
 }
 bm.design_create('dev_test', design, use_devmode=True, syncwait=0)
+
+
+bm = cibucket.bucket.bucket_manager()
+design = {
+    '_id': '_design/dev_test',
+    'language': 'javascript',
+    'views': {
+        'test_2': {
+            'map':
+                """
+                    function (doc, meta) {
+                      if (doc.type == "comment-added") {
+                        if ((doc.author == "jenkins" && doc.pipeline == "check") || doc.author != "jenkins")
+                        emit([doc.change.project, doc.author, doc.change.createdOn], {
+                            "job": doc.job,
+                            "build_result": doc.build_result,
+                            "result": doc.result_text,
+                            "checkedOn": doc.eventCreatedOn,
+                            "eventCreatedOn": doc.change.createdOn,
+                            "patchSet": doc.change.patchSet,
+                            "number": doc.change["number"]
+                        })
+                      }
+                    }
+                """
+        }
+    }
+}
+bm.design_create('dev_test', design, use_devmode=True, syncwait=0)

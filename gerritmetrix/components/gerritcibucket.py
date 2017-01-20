@@ -104,10 +104,28 @@ class GerritCiBucket:
                 if row.value[1] not in changes[row.value[0]]:
                     changes[row.value[0]].append(row.value[1])
 
-        return (changes, raw_result)
+        return changes, raw_result
 
     @gen.coroutine
-    def get_check_result(self, project, changes, author, individual=0):
+    def get_check_results_view(self, project, author, start, end):
+        if self.bucket is None:
+            self.initialise()
+
+        result = yield self.bucket.queryAll("dev_test", "test_2", endkey=[project, author, start],
+                                            startkey=[project, author,end], full_set=True, descending=True)
+
+        final_result = []
+        jobs = []
+        if result:
+            for row in result:
+                final_result.append(row.value)
+                if row.value['job'] not in jobs:
+                    jobs.append(row.value['job'])
+
+        return final_result, jobs
+
+    @gen.coroutine
+    def get_check_result(self, project, changes, author, individual=0, start=0):
         if self.bucket is None:
             self.initialise()
 
@@ -139,6 +157,8 @@ class GerritCiBucket:
             else:
                 query = ' '.join([query, 'and author = "{0}" and change.patchSet'.format(author)])
 
+            query = ' '.join([query, 'and eventCreatedOn > {0}'.format(start)])
+
             changes_part = [];
             query = ' '.join([query, 'and change.`number` in '])
             for change, patchSets in changes.items():
@@ -146,6 +166,7 @@ class GerritCiBucket:
             query = ' '.join([query, '[', ','.join(changes_part), ']'])
             query = ' '.join([query, 'order by checkedOn'])
 
+        print(query)
         result = yield self.bucket.n1qlQueryAll(query=query)
         result = yield self.process_rows(result, False)
 
