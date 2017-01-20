@@ -216,7 +216,7 @@ gerritmetrix.controller('projectTableCtrl', ['$scope', '$http', '$state', 'Proje
     })
 
     calibrate();
-    angular.element($window).on('resize', function() {
+    $(window).resize(function() {
         calibrate();
     })
 
