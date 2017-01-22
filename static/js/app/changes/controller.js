@@ -66,7 +66,9 @@ gerritmetrix.controller('changeCtrl', ['$scope', '$http', '$state', 'SweetAlert'
     $scope.change_number = $stateParams.change_number;
     $scope.subtitle = $scope.change_number;
 
-    $scope.patchSet_width = 80;
+    $scope.authors = {jenkins: {username: 'jenkins', name: 'Jenkins', jobs: []}}
+
+    $scope.patchSet_width = 50;
 
     var prepareChange = function(change) {
         $scope.change = change;
@@ -86,7 +88,6 @@ gerritmetrix.controller('changeCtrl', ['$scope', '$http', '$state', 'SweetAlert'
             $scope.changes.push([$scope.change_number, patchSet.patchSet.number]);
         })
 
-        $scope.authors = {}
         $scope.results = {}
         $scope.final_results = {}
         angular.forEach($scope.change.comments, function(comment) {
@@ -101,12 +102,10 @@ gerritmetrix.controller('changeCtrl', ['$scope', '$http', '$state', 'SweetAlert'
         })
 
         angular.forEach($scope.authors, function(author) {
-            Projects.getChart({
+            Changes.getChart({
                 project: $scope.change.change.project,
                 author: author.username,
-                individual: 1,
-                including_changes: 0,
-                changes_list: $scope.change_list
+                change: $scope.change_number
             }).then(function(data) {
 
                 if (typeof data.data.result[0] == 'undefined')
@@ -145,11 +144,13 @@ gerritmetrix.controller('changeCtrl', ['$scope', '$http', '$state', 'SweetAlert'
         angular.forEach($scope.results[author.username], function(result) {
             if (typeof result.result == 'undefined')
                 result.result = 0;
-            final_results[result.job][result.number][result.patchSet].push({build_result: result.build_result, result: result.result, date: result.checkedOn})
+            if (typeof final_results[result.job][result.number][result.patchSet] != 'undefined')
+                final_results[result.job][result.number][result.patchSet].push({
+                    build_result: result.build_result, result: result.result, date: result.checkedOn
+                })
         })
 
         $scope.final_results[author.username] = final_results;
-        window.console.log($scope.final_results);
     }
 
     Changes.getChange($scope.change_number)

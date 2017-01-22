@@ -227,13 +227,13 @@ gerritmetrix.component('tableMouseoverScroll', {
             $(document).on('mouseover', '.change_left', function() {
                 var job = $(this).data('job');
                 $(this).addClass('hovered');
-                $(document).find('.ci_result[data-job="'+job+'"]').addClass('hovered');
+                $(document).find('.patchset-content[data-job="'+job+'"]').addClass('hovered');
             })
 
             $(document).on('mouseout', '.change_left', function() {
                 var job = $(this).data('job');
                 $(this).removeClass('hovered');
-                $(document).find('.ci_result[data-job="'+job+'"]').removeClass('hovered');
+                $(document).find('.patchset-content[data-job="'+job+'"]').removeClass('hovered');
             })
 
             $(document).on('mouseout', '.patchset-content', function(){

@@ -8,6 +8,9 @@ gerritmetrix.factory('Changes', ['$http', function($http) {
         },
         getChange: function(change_number) {
             return $http.post('/change', {change_number: change_number});
-        }
+        },
+        getChart: function(data) {
+            return $http.post('/change_chart', data);
+        },
     }
 }])

@@ -206,4 +206,18 @@ class GerritCiBucket:
 
         return final_result
 
+    @gen.coroutine
+    def get_change_result(self, project, author, change):
+        if self.bucket is None:
+            self.initialise()
 
+        result = yield self.bucket.queryAll("dev_test", "test_3", key=[project, author, change], full_set=True)
+        final_result = []
+        jobs = []
+        if result:
+            for row in result:
+                final_result.append(row.value)
+                if row.value['job'] not in jobs:
+                    jobs.append(row.value['job'])
+
+        return final_result, jobs

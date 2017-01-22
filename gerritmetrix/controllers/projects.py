@@ -6,6 +6,7 @@ from copy import deepcopy
 import re
 import traceback
 import uuid
+import time
 
 
 class ProjectsHandler(tornado.web.RequestHandler):
@@ -133,19 +134,13 @@ class ProjectChartHandler(tornado.web.RequestHandler):
             params = {}
 
         cibucket = GerritCiBucket()
-        bucket = GerritMetrixBucket()
 
         if 'changes_list' not in params.keys():
             changes = yield cibucket.get_changes_interval(params['project'], params['start'], params['end'])
         else:
             changes = (params['changes_list'], [])
 
-        res = yield cibucket.get_check_results_view(params['project'], params['author'],
-                                                    params['start'], params['end'])
-
         if changes[0]:
-            # events = yield cibucket.get_check_result(params['project'], changes[0], params['author'],
-            #                                          params['individual'], params['start'])
             events = yield cibucket.get_check_results_view(params['project'], params['author'],
                                                     params['start'], params['end'])
         else:

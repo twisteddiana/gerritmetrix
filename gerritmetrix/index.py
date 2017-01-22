@@ -6,7 +6,7 @@ import tornado.platform.twisted
 import configparser
 tornado.platform.twisted.install()
 from controllers.projects import ProjectsHandler, ProjectHandler, ProjectChartHandler, ProjectAuthorHandler
-from controllers.changes import ChangesHandler, ChangeHandler
+from controllers.changes import ChangesHandler, ChangeHandler, ChangeChartHandler
 from controllers.cis import CiHandler, CisHandler
 
 class MainHandler(tornado.web.RequestHandler):
@@ -24,6 +24,7 @@ def make_app():
         (r"/authors", ProjectAuthorHandler),
         (r"/changes", ChangesHandler),
         (r"/change", ChangeHandler),
+        (r"/change_chart", ChangeChartHandler),
         (r"/cis", CisHandler),
         (r"/ci", CiHandler)
     ], **settings)
