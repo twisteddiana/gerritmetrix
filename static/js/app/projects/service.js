@@ -38,7 +38,7 @@ gerritmetrix.factory('Projects', ['$http', '$sce', function($http, $sce) {
                     author_results[change_arr] = {
                         item_html: '',
                         total: 0,
-                        text: '<div>No results</div>',
+                        text: '',
                         change: change_arr[0],
                         patchSet: change_arr[1],
                         id: change_arr[0] + '_' + change_arr[1]
@@ -61,13 +61,13 @@ gerritmetrix.factory('Projects', ['$http', '$sce', function($http, $sce) {
 
                     var total = final_results[job.job][change][patchSet].length;
 
-                    var text = "<div>";
-                    var item_html = "";
+                    var text = '';
+                    var item_html = '';
 
                     var draw_author_line = false;
                     if (author_results[change_arr].total == 0) {
-                        var text_author = "<div>";
-                        var item_html_author = "";
+                        var text_author = '<div>';
+                        var item_html_author = '';
                         draw_author_line = true;
                     }
 
@@ -84,13 +84,14 @@ gerritmetrix.factory('Projects', ['$http', '$sce', function($http, $sce) {
                         }
 
                         var date = new Date(result.date * 1000);
-                        text += '<p> Result <b>' + result.result + '</b> at ' + date.toUTCString() + '</p>';
+                        text += '<p><b>' + result.result + '</b> at ' + date.toDateString() + ' ' + date.toLocaleTimeString()+ '</p>';
                         item_html += '<div class="fraction ' + class_name + '" style="width: ' + 100 / total + '%"></div>';
 
                         if (draw_author_line) {
                             var class_name = '';
                             if (result.build_result == null || result.build_result.indexOf('fail') == 0) {
                                 class_name = 'fraction-fail';
+                                result.build_result = 'failure';
                             }
                             else if (result.build_result.indexOf('succ') == 0) {
                                 class_name = 'fraction-success';
@@ -100,25 +101,23 @@ gerritmetrix.factory('Projects', ['$http', '$sce', function($http, $sce) {
                             }
 
                             var date = new Date(result.date * 1000);
-                            text_author += '<p> Build result <b>'+ result.build_result +'</b> at ' + date.toUTCString() + '</p>';
+                            text_author += '<p><b>'+ result.build_result.toUpperCase() +'</b> at ' + date.toDateString() + ' ' + date.toLocaleTimeString() + '</p>';
 
                             item_html_author += '<div class="fraction '+class_name+'" style="width: '+ 100 / total +'%"></div>'
                         }
                     })
 
-                    if (total == 0)
-                        text += 'No results';
-                    else {
+                    if (total == 0) {
+
+                    } else {
                         var head_text = '';
                         if (total > 2)
                             head_text = '<p>' + (total - 1) + ' rechecks</p>';
                         else if (total == 2)
                             head_text = '<p>1 recheck</p>';
 
-                        text = text.replace('<div>', '<div>' + head_text);
+                        text = '<div>' + head_text + text + '</div>'
                     }
-
-                    text += '</div>';
 
                     if (draw_author_line && total > 0) {
                         var head_text = '';

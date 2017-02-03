@@ -124,7 +124,7 @@
                         <div ng-if="author.show_jobs && (!only_selected_jobs || (only_selected_jobs && job.selected))"
                              class="tbody_row" ng-repeat="job in author.jobs track by job.job">
                             <div class="change_left" ng-class="{'selected': job.selected}"
-                                 data-job="{{::job.job}}" ng-click="select_job(job.job)">
+                                 data-job="{{::job.job}}" ng-click="select_job(job.job)" title="{{::job.job}}">
                                 {{::job.job}}
                             </div>
                             <div class="patchset-content" ng-style="{width: patchSet_width + 'px'}"
@@ -149,7 +149,7 @@
             <pre>{{change_tooltips[change].commitMessage}}</pre>
         </div>
         <hr>
-        <p>Patchset {{change[1]}} uploaded at: {{change_tooltips[change].date * 1000 | date:'EEE, dd MMM yyyy HH:mm:ss' : 'GMT'}} GMT</p>
+        <p>Patchset {{change[1]}} uploaded at: {{change_tooltips[change].date * 1000 | date:'EEE dd MMM yyyy HH:mm:ss'}} </p>
     </script>
     <script type="text/ng-template" id="autocomplete.html">
         <a>

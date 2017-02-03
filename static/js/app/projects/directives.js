@@ -285,6 +285,8 @@ gerritmetrix.component('tableMouseoverScroll', {
             $('.scroll-holder').scroll(extrascroll);
 
             $(document).on('mouseover', '.patchset-content', function() {
+                if (!$(this).data('tooltip').length)
+                    return;
                 var element = $(this);
                 $timeout(function() {
                     if (element.is(':hover')) {
