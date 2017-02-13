@@ -1,0 +1,159 @@
+<style>
+    .table-holder-duplicate {
+       font-size: 12px;
+        font-family: Arial;
+        border-top: 1px solid #ccc;
+    }
+    .change-header {
+        width: {{ change_width }}px;
+        display: block;
+        float: left;
+        text-align: center;
+        border-bottom: 1px solid #ccc;
+        border-right: 1px solid #ccc;
+        box-sizing: border-box;
+        padding: 3px 2px;
+    }
+
+    .change-result {
+        width: {{ change_width }}px;
+        display: block;
+        float: left;
+        height: 25px;
+        overflow: hidden;
+        box-sizing: border-box;
+        position: relative;
+        border-bottom: 1px solid #ccc;
+        border-right: 1px solid #ccc;
+        box-sizing: border-box;
+    }
+
+    .change_left_preview_details {
+        display: block;
+        width: 400px;
+        float: left;
+        line-height: 25px;
+        height: 25px;
+        overflow: hidden;
+        border-bottom: 1px solid #ccc;
+        border-right: 1px solid #ccc;
+        border-left: 1px solid #ccc;
+        padding: 0 3px;
+        box-sizing: border-box;
+    }
+
+    .thead_row .change_left_preview_details {
+        height: auto;
+        line-height: inherit;
+        padding: 3px;
+    }
+
+    .clear {
+        clear:both;
+    }
+
+    .ci_result {
+        position: absolute;
+        top: 0; left: 0px;
+        bottom: 0px; right: 0;
+        width: 100%;
+    }
+
+    .ci_result .fraction {
+        float: left;
+        height: 24px;
+    }
+
+    .fraction.fraction-fail {
+        background: #E26A6A;
+    }
+
+    .fraction.fraction-success {
+        background: #1BBC9B;
+    }
+
+    .fraction.fraction-other {
+        background: #95A5A6;
+    }
+</style>
+
+<h1>{{ project }}</h1>
+<div class="table-holder-duplicate" style="width: {{ change_width * len(changes) + 400}}px">
+    <div class="thead">
+        <div class="thead_row">
+            <div class="change_left_preview_details">
+                Change
+                <br>
+                Patchset
+            </div>
+            {% for change in changes %}
+            <div class="change-header">
+                {{ change[0] }}<br>{{ change[1] }}
+            </div>
+            {% end %}
+            <div class="clear"></div>
+        </div>
+    </div>
+    {% for author in authors %}
+        {% if not only_selected_jobs or ('selected' in author.keys() and author['selected']) %}
+            <div class="tbody">
+                <div class="change_left_preview_details">
+                    <strong>{{ author['name'] }}</strong>
+                </div>
+                {% for change in changes %}
+                    {% set result = '_'.join([change[0], change[1]]) %}
+                    <div class="change-result">
+                        <div class="ci_result">
+                            {% if len(results[author['username']][author['username']][result]) %}
+                                {% set size = 100 / len(results[author['username']][author['username']][result]) %}
+                                {% for response in results[author['username']][author['username']][result] %}
+                                    {% if 'build_result' not in response.keys() or not response['build_result'] or response['build_result'].lower().find('fail') == 0 %}
+                                        {% set css_class = 'fraction-fail' %}
+                                    {% else %}
+                                        {% if response['build_result'].lower().find('succ') == 0 %}
+                                            {% set css_class = 'fraction-success' %}
+                                        {% else %}
+                                            {% set css_class='fraction-other' %}
+                                        {% end %}
+                                    {% end %}
+                                    <div class="fraction {{ css_class }}" style="width: {{ size }}%"></div>
+                                {% end %}
+                            {% end %}
+                        </div>
+                    </div>
+                {% end %}
+            </div>
+        {% end %}
+        {% for job in author['jobs'] %}
+            {% if (not only_selected_jobs or ('selected' in job.keys() and job['selected'])) and author['show_jobs'] %}
+            <div class="tbody">
+                <div class="change_left_preview_details">
+                    {{ job['job'] }}
+                </div>
+                {% for change in changes %}
+                     {% set result = '_'.join([change[0], change[1]]) %}
+                    <div class="change-result">
+                        <div class="ci_result">
+                            {% if len(results[author['username']][job['job']][result]) %}
+                                {% set size = 100 / len(results[author['username']][job['job']][result]) %}
+                                {% for response in results[author['username']][job['job']][result] %}
+                                    {% if not response['result'] or response['result'].lower().find('fail') == 0 %}
+                                        {% set css_class = 'fraction-fail' %}
+                                    {% else %}
+                                        {% if response['result'].lower().find('succ') == 0 %}
+                                            {% set css_class = 'fraction-success' %}
+                                        {% else %}
+                                            {% set css_class='fraction-other' %}
+                                        {% end %}
+                                    {% end %}
+                                    <div class="fraction {{ css_class }}" style="width: {{ size }}%"></div>
+                                {% end %}
+                            {% end %}
+                        </div>
+                    </div>
+                {% end %}
+            </div>
+            {% end %}
+        {% end %}
+    {% end %}
+</div>

@@ -209,6 +209,32 @@ gerritmetrix.directive('ciAuthorContent', function($sce, $compile) {
     }
 })
 
+/*gerritmetrix.directive('showAllContent', function($sce, $timeout) {
+    return {
+        templateUrl: 'static/templates/utils/table/all_content.html',
+        scope: false,
+        link: function (scope, iElement, iAttrs) {
+            scope.trustAsHtml = function(html) {
+                return $sce.trustAsHtml(html);
+            }
+            $timeout(function() {
+                html2canvas($('#temp_table_holder'), {
+                    width: scope.patchSet_width * scope.changes.length + 500,
+                    onrendered: function (canvas) {
+                        var imgageData = canvas.toDataURL("image/png");
+                        //var newData = imgageData.replace(/^data:image\/png/, "data:application/octet-stream");
+                        $("#canvas_button").attr("download", scope.project_name + ".png").attr("href", imgageData);
+                        $('#temp_table_holder').remove();
+                        window.console.log('done');
+                        scope.canvas_ready = true;
+                        scope.canvas_working = false;
+                    }
+                });
+            })
+        }
+    }
+})*/
+
 gerritmetrix.component('tableMouseoverScroll', {
     controller: function($document, $window, $scope, $timeout) {
         var init = function() {
@@ -347,13 +373,6 @@ gerritmetrix.component('tableMouseoverScroll', {
         this.$onDestroy = function() {
             destroy();
         }
-
-        /*$scope.$on('suspend', function () {
-         destroy();
-         })
-         $scope.$on('resume', function() {
-         init();
-         })*/
     }
 })
 

@@ -91,7 +91,7 @@ gerritmetrix.controller('projectViewCtrl', ['$scope', '$http', '$state', 'SweetA
     $scope.getList();
 }])
 
-gerritmetrix.controller('projectTableCtrl', ['$scope', '$http', '$state', 'Projects', '$location', '$stateParams', 'CI', '$timeout', 'Changes', '$sce', '$window', '$filter', function($scope, $http, $state, Projects, $location, $stateParams, CI, $timeout, Changes, $sce, $window, $filter) {
+gerritmetrix.controller('projectTableCtrl', ['$scope', '$http', '$state', 'Projects', '$location', '$stateParams', 'CI', '$timeout', 'Changes', '$sce', '$window', '$filter', '$compile', function($scope, $http, $state, Projects, $location, $stateParams, CI, $timeout, Changes, $sce, $window, $filter, $compile) {
     $scope.title = "Project";
     $scope.project_name = $stateParams.project_name;
     $scope.subtitle = $scope.project_name;
@@ -106,7 +106,7 @@ gerritmetrix.controller('projectTableCtrl', ['$scope', '$http', '$state', 'Proje
     $scope.only_selected_jobs = false;
     $scope.selected_jobs = [];
 
-     //the visible ones
+    //the visible ones
     $scope.visible_changes = [];
     $scope.visible_author_results = [];
     $scope.visible_final_results = [];
@@ -325,10 +325,10 @@ gerritmetrix.controller('projectTableCtrl', ['$scope', '$http', '$state', 'Proje
         var authors = $location.search().authors.split(',');
         angular.forEach(authors, function(piece) {
             var result = $scope.searchAuthor(piece).then(function (results) {
-               angular.forEach(results, function(result) {
-                   if (result.username == piece)
-                       $scope.authorSelect(result);
-               })
+                angular.forEach(results, function(result) {
+                    if (result.username == piece)
+                        $scope.authorSelect(result);
+                })
             });
         })
     }
@@ -341,10 +341,10 @@ gerritmetrix.controller('projectTableCtrl', ['$scope', '$http', '$state', 'Proje
         delete $scope.visible_final_results[author.username];
         delete $scope.visible_author_results[author.username];
         if (typeof $location.search().authors != 'undefined') {
-             var list = $location.search().authors.split(',');
-             var index = list.indexOf(author.username);
-             list.splice(index, 1);
-             $location.search('authors', list.join(','));
+            var list = $location.search().authors.split(',');
+            var index = list.indexOf(author.username);
+            list.splice(index, 1);
+            $location.search('authors', list.join(','));
         }
     }
 
@@ -387,6 +387,46 @@ gerritmetrix.controller('projectTableCtrl', ['$scope', '$http', '$state', 'Proje
     }
 
     $scope.getAllValues();
+
+    /*$scope.canvas_ready = false;
+     $scope.canvas_working = false;
+     $scope.toCanvas = function() {
+     $scope.canvas_ready = false;
+     $scope.canvas_working = true;
+     var compiledHTML = $compile("<div show-all-content></div>")($scope);
+     $("#temp_holder").append(compiledHTML);
+     }*/
+
+    $scope.canvas_working = false;
+    $scope.toCanvas = function() {
+        $scope.canvas_ready = false;
+        $scope.canvas_working = true;
+
+        var obj = {
+            project: $scope.project_name,
+            start: $scope.dates.start,
+            end: $scope.dates.end,
+            changes: $scope.changes,
+            authors: $scope.authors,
+            change_width: Math.ceil($scope.patchSet_width),
+            only_selected_jobs: $scope.only_selected_jobs,
+        };
+
+        Projects.generatePdf(obj).then(function(data) {
+            //var blob = new Blob([data.data], {type: 'application/pdf'})
+            var blob = new Blob([data.data], {type: 'text/html'})
+            var url = URL.createObjectURL(blob);
+
+            var hiddenElement = document.createElement('a');
+            hiddenElement.href = url;
+            hiddenElement.target = '_blank';
+            hiddenElement.download = $scope.project_name + '.html';
+            hiddenElement.click();
+            hiddenElement.remove();
+            $scope.canvas_working = false;
+        });
+
+    }
 }])
 
 gerritmetrix.controller('projectChartCtrl', ['$scope', '$http', '$state', 'Projects', '$location', '$stateParams', 'CI', function($scope, $http, $state, Projects, $location, $stateParams, CI) {

@@ -221,3 +221,29 @@ class GerritCiBucket:
                     jobs.append(row.value['job'])
 
         return final_result, jobs
+
+    @gen.coroutine
+    def prepare_results(self, events, changes_list):
+        final_results = {}
+        for author, list in events.items():
+            final_results[author] = {}
+            final_results[author][author] = {}
+            for job in list[1]:
+                final_results[author][job] = {}
+                for change in changes_list:
+                    final_results[author][job]['_'.join([change[0], change[1]])] = []
+            for change in changes_list:
+                final_results[author][author]['_'.join([change[0], change[1]])] = []
+
+            for result in list[0]:
+                change_key = '_'.join([result['number'], result['patchSet']])
+                final_results[author][result['job']][change_key].append(result)
+
+            for change in changes_list:
+                change_key = '_'.join([change[0], change[1]])
+                for job in list[1]:
+                    if len(final_results[author][job][change_key]):
+                        final_results[author][author][change_key] = final_results[author][job][change_key]
+                        break
+
+        return final_results

@@ -167,6 +167,10 @@ gerritmetrix.factory('Projects', ['$http', '$sce', function($http, $sce) {
                 linear_author.push(result);
             })
             $scope.author_result[author.username] = linear_author;
+        },
+        generatePdf: function(data) {
+            return $http.put('/project_chart', data, {responseType: 'arraybuffer'});
         }
     }
+
 }])

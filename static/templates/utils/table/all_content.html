@@ -1,0 +1,46 @@
+<div class="table-holder-duplicate" id="temp_table_holder" style="background: #fff;" ng-style="{width: patchSet_width * changes.length + 400 + 'px'}">
+    <div class="thead">
+        <div class="thead_row">
+            <div class="change_left_preview_details">
+                <strong>{{project_name}}</strong> <br>
+                Interval:
+                <strong ng-if="interval == 7">7 days</strong>
+                <strong ng-if="interval == 3">3 days</strong>
+                <strong ng-if="interval == 1">24 hours</strong>
+                <strong ng-if="interval == 0">
+                    {{datepickerFrom}} - {{datepickerTo}}
+                </strong>
+            </div>
+            <div class="change-header" ng-style="{width: patchSet_width + 'px'}"
+                 ng-repeat="change in ::changes track by change">
+                {{::change[0]}}<br>{{::change[1]}}
+            </div>
+        </div>
+    </div>
+    <div class="tbody" ng-repeat="author in ::authors track by author.username">
+        <div ng-if="!only_selected_jobs || (only_selected_jobs && author.selected)"
+             class="tbody_row author_row">
+            <div class="change_left_preview">
+                {{author.name}}
+            </div>
+            <div class="patchset-content" ng-style="{width: patchSet_width + 'px'}"
+                 ng-repeat="line in author_result[author.username] track by line.id">
+                <div class="ci_result">
+                    <div ng-bind-html="::line.item_html"></div>
+                </div>
+            </div>
+        </div>
+        <div ng-if="author.show_jobs && (!only_selected_jobs || (only_selected_jobs && job.selected))"
+             class="tbody_row" ng-repeat="job in ::author.jobs track by job.job">
+            <div class="change_left_preview">
+                {{::job.job}}
+            </div>
+            <div class="patchset-content" ng-style="{width: patchSet_width + 'px'}"
+                 ng-repeat="line in ::final_results[author.username][job.job] track by line.id ">
+                <div class="ci_result">
+                    <div ng-bind-html="::line.item_html"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

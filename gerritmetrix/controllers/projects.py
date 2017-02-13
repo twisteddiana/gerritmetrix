@@ -7,6 +7,7 @@ import re
 import traceback
 import uuid
 import time
+import pdfkit
 
 
 class ProjectsHandler(tornado.web.RequestHandler):
@@ -150,6 +151,38 @@ class ProjectChartHandler(tornado.web.RequestHandler):
             self.write({'result': events[0], 'changes': changes[1], 'jobs': events[1], 'changes_list': changes[0]})
         else:
             self.write({'result': events[0], 'jobs': events[1]})
+
+    @gen.coroutine
+    def put(self):
+        if self.request.body != b'':
+            params = tornado.escape.json_decode(self.request.body)
+        else:
+            params = {}
+
+        cibucket = GerritCiBucket()
+        events = {}
+        for author in params['authors']:
+            events[author['username']] = yield cibucket.get_check_results_view(params['project'], author['username'],
+                                                           params['start'], params['end'])
+
+        results = yield cibucket.prepare_results(events, params['changes'])
+        html = self.render_string("reports/project_table.html", results=results, authors=params['authors'],
+                                  changes=params['changes'], change_width=params['change_width'],
+                                  project=params['project'], start=params['start'], end=params['end'],
+                                  only_selected_jobs=params['only_selected_jobs']
+                                  )
+
+        self.write(html)
+        # options = {
+        #     'page-width': (len(params['changes']) * params['change_width'] + 400) / 3.779528 + 20,
+        #     'margin-left': 10,
+        #     'margin-right': 10,
+        #     'page-height': 200,
+        #     'dpi': 300,
+        # }
+        #
+        # my_pdf = pdfkit.from_string(html.decode('utf-8'), None, options=options)
+        # self.write(my_pdf)
 
 
 class ProjectAuthorHandler(tornado.web.RequestHandler):

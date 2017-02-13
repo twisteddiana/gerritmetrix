@@ -441,16 +441,38 @@ ul.pagination {
 }
 
 .change_left {
-    width: 400px;
+    width: 300px;
     border: 1px solid #ccc;
     border-top: none;
-    padding: 3px 5px;
+    padding: 0px 5px;
     position: absolute;
     left:30px;
     top: auto;
     background: #fff;
     z-index: 2;
     cursor: pointer;
+    line-height: 25px;
+    overflow: hidden;
+}
+
+.change_left_preview {
+    width: 400px;
+    border: 1px solid #ccc;
+    border-top: none;
+    padding: 0px 5px;
+    background: #fff;
+    line-height: 25px;
+    overflow: hidden;
+}
+
+.change_left_preview_details {
+    width: 400px;
+    border: 1px solid #ccc;
+    border-top: none;
+    padding: 0px 5px;
+    background: #fff;
+    line-height: 20px;
+    overflow: hidden;
 }
 
 .table-holder, .table-holder .thead, .table-holder .thead .thead_row {
@@ -476,7 +498,7 @@ ul.pagination {
 }
 
 .table-holder {
-    margin-left: 400px;
+    margin-left: 300px;
     /*margin-top: 50px;*/
 }
 
@@ -484,10 +506,11 @@ ul.pagination {
     position: absolute;
     top: 0;
     bottom: 0; left:0; right:0;
+    width: 100%;
 }
 .ci_result .fraction {
     float:left;
-    height: 25px;
+    height: 24px;
 }
 
 .fraction.fraction-success {
@@ -691,6 +714,6 @@ ul.pagination {
     opacity: 0;
 }
 
-.jqtooltip p:last-child {
+.jqtooltip p {
     margin-bottom: 0;
 }
