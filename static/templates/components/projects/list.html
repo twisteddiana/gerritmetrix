@@ -20,7 +20,7 @@
         <tbody>
             <tr ng-repeat="project in projects">
                 <td>
-                    <!--<a ui-sref="app.projects.chart({project_name: project.project})">View Chart</a>-->
+                    <a ui-sref="app.projects.chart({project_name: project.project})">View Chart</a>
                     <a ui-sref="app.projects.table({project_name: project.project})">View Table</a>
                 </td>
                 <td><a ui-sref="app.projects.detail({project_name: project.project})">{{project.project}}</a></td>

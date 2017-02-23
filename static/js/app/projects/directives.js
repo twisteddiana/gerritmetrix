@@ -358,7 +358,7 @@ gerritmetrix.component('tableMouseoverScroll', {
         }
 
         var destroy = function() {
-            $('window').off('scroll');
+            $(window).off('scroll');
             $(document).off('mouseover', '.patchset-content');
             $(document).off('mouseover', '.change_left');
             $(document).off('mouseout', '.change_left');

@@ -464,30 +464,48 @@ gerritmetrix.controller('projectChartCtrl', ['$scope', '$http', '$state', 'Proje
                 fail_list[author.username] = [];
             }
 
+            if (!author.individual)
+                var passed = {}
+
             angular.forEach($scope.results[author.username], function(result) {
                 if (result.eventCreatedOn == null)
                     result.eventCreatedOn = result.checkedOn;
-                if (result.result == null || result.result.indexOf('fail') == 0) {
-                    if (author.individual)
+
+                var is_fail = false;
+                var is_success = false;
+                if (author.individual) {
+                    if (result.result == null || result.result.toLowerCase().indexOf('fail') == 0) {
                         fail_list[author.username][result.job].push(result);
-                    else
-                        fail_list[author.username].push(result);
-
-                    if (result.eventCreatedOn > max_fail_date)
-                        max_fail_date = result.eventCreatedOn;
-                    if (result.eventCreatedOn < min_fail_date)
-                        min_fail_date = result.eventCreatedOn;
-                }
-                else if (result.result.indexOf('succ') == 0) {
-                    if (author.individual)
+                        is_fail = true;
+                    } else if (result.result.toLowerCase().indexOf('succ') == 0) {
                         success_list[author.username][result.job].push(result);
-                    else
-                        success_list[author.username].push(result);
+                        is_success = true;
+                    }
+                } else {
+                    if (typeof passed[result.number + '_' + result.patchSet] != 'undefined')
+                        return;
 
+                    if (result.build_result == null || result.build_result.toLowerCase().indexOf('fail') == 0) {
+                        fail_list[author.username].push(result);
+                        is_fail = true;
+                    } else if (result.build_result.toLowerCase().indexOf('succ') == 0) {
+                        success_list[author.username].push(result);
+                        is_success = true;
+                    }
+
+                    passed[result.number + '_' + result.patchSet] = 1;
+                }
+
+                if (is_success) {
                     if (result.eventCreatedOn > max_success_date)
                         max_success_date = result.eventCreatedOn;
                     if (result.eventCreatedOn < min_success_date)
                         min_success_date = result.eventCreatedOn;
+                } else if (is_fail) {
+                    if (result.eventCreatedOn > max_fail_date)
+                        max_fail_date = result.eventCreatedOn;
+                    if (result.eventCreatedOn < min_fail_date)
+                        min_fail_date = result.eventCreatedOn;
                 }
             })
         })
@@ -591,7 +609,8 @@ gerritmetrix.controller('projectChartCtrl', ['$scope', '$http', '$state', 'Proje
             start: $scope.dates.start,
             end: $scope.dates.end,
             author: author.username,
-            individual: author.individual
+            individual: author.individual,
+            including_changes: true,
         };
     }
 
@@ -614,13 +633,41 @@ gerritmetrix.controller('projectChartCtrl', ['$scope', '$http', '$state', 'Proje
             if (author.individual) {
                 author.jobs = []
                 var jobs = {}
-                angular.forEach($scope.results[author.username], function(result) {
-                    if (typeof jobs[result.job] == 'undefined') {
-                        author.jobs.push({job: result.job, color: getRandomColor(), selected: false});
-                        jobs[result.job] = 1;
+                angular.forEach(data.data.jobs, function(job) {
+                    if (typeof jobs[job] == 'undefined') {
+                        author.jobs.push({job: job, color: getRandomColor(), selected: false});
+                        jobs[job] = 1;
                     }
                 })
             }
+
+            var intermediary_results = {}
+            angular.forEach(data.data.changes, function(change) {
+                var change_string = change[0]+'_'+change[1];
+                intermediary_results[change_string] = {};
+                angular.forEach(data.data.jobs, function(job) {
+                    intermediary_results[change_string][job] = false;
+                })
+            })
+
+            angular.forEach($scope.results[author.username], function(result) {
+                var change_string = result['number'] + '_' + result['patchSet'];
+                if (intermediary_results[change_string][result.job] === false)
+                    intermediary_results[change_string][result.job] = result;
+                else if (intermediary_results[change_string][result.job]['checkedOn'] < result['checkedOn'])
+                    intermediary_results[change_string][result.job] = result;
+            })
+
+            var final_results = [];
+            angular.forEach(data.data.changes, function(change) {
+                var change_string = change[0]+'_'+change[1];
+                angular.forEach(data.data.jobs, function(job) {
+                    if (intermediary_results[change_string][job] != false)
+                        final_results.push(intermediary_results[change_string][job]);
+                })
+            })
+
+            $scope.results[author.username] = final_results;
 
             if (all) {
                 loaded++;
