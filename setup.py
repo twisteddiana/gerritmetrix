@@ -5,5 +5,5 @@ setup(name='Gettrix',
       description='Gerrit CI metrics',
       author='Diana Barsan',
       author_email='twisteddiana@gmail.com',
-      packages=['gerritmetrix', 'gerritmetrix.command', 'gerritmetrix.controllers'],
+      packages=['gerritmetrix', 'gerritmetrix.components', 'gerritmetrix.controllers'],
      )
