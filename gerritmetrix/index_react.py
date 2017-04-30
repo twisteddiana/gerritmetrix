@@ -1,7 +1,7 @@
 import tornado.ioloop
 import tornado.web
 from tornado import gen
-from settings import settings
+from settings_react import settings
 import tornado.platform.twisted
 import configparser
 tornado.platform.twisted.install()
@@ -12,7 +12,7 @@ from controllers.cis import CiHandler, CisHandler
 class MainHandler(tornado.web.RequestHandler):
     @gen.coroutine
     def get(self):
-        self.render("index.html")
+        self.render("index.ejs")
 
 
 def make_app():
@@ -34,7 +34,7 @@ if __name__ == "__main__":
     config.read(settings['config_path'])
 
     app = make_app()
-    app.listen(config['general']['port'])
+    app.listen(8880)
     #tornado.ioloop.IOLoop.current().start()
     try:
         tornado.ioloop.IOLoop.instance().start()
