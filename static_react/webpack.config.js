@@ -5,7 +5,7 @@
 const webpack = require('webpack');
 const path = require('path');
 
-var ExtractTextPlugin = require("extract-text-webpack-plugin");
+var ExtractTextPlugin = require('extract-text-webpack-plugin');
 var plugins = [];
 plugins.push(
     new ExtractTextPlugin('../css/bundle.css')
@@ -27,13 +27,14 @@ module.exports = {
             loader: 'babel-loader',
             query: {
                 cacheDirectory: 'babel_cache',
-                presets: ['react', 'es2015']
+                presets: ['react', 'es2015'],
+                plugins: ['transform-es2015-destructuring', 'transform-object-rest-spread']
             }
         }, {
             test: /\.styl$/,
             loader: ExtractTextPlugin.extract({
-                fallback: "style-loader",
-                use: ["css-loader", "stylus-loader"]//"!!"
+                fallback: 'style-loader',
+                use: ['css-loader', 'stylus-loader']//"!!"
             })
         }, {
             test: /\.css$/,
