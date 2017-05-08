@@ -17,16 +17,16 @@ class MainHandler(tornado.web.RequestHandler):
 
 def make_app():
     return tornado.web.Application([
-        (r"/", MainHandler),
-        (r"/projects", ProjectsHandler),
-        (r"/project", ProjectHandler),
-        (r"/project_chart", ProjectChartHandler),
-        (r"/authors", ProjectAuthorHandler),
-        (r"/changes", ChangesHandler),
-        (r"/change", ChangeHandler),
-        (r"/change_chart", ChangeChartHandler),
-        (r"/cis", CisHandler),
-        (r"/ci", CiHandler)
+        (r"/api/projects", ProjectsHandler),
+        (r"/api/project", ProjectHandler),
+        (r"/api/project_chart", ProjectChartHandler),
+        (r"/api/authors", ProjectAuthorHandler),
+        (r"/api/changes", ChangesHandler),
+        (r"/api/change", ChangeHandler),
+        (r"/api/change_chart", ChangeChartHandler),
+        (r"/api/cis", CisHandler),
+        (r"/api/ci", CiHandler),
+        (r"/.*", MainHandler),
     ], **settings)
 
 if __name__ == "__main__":

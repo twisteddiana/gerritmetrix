@@ -5,6 +5,9 @@ import axios from 'axios'
 
 export const REQUEST_PROJECTS = 'REQUEST_PROJECTS'
 export const RECEIVE_PROJECTS = 'RECEIVE_PROJECTS'
+export const NEXT_PAGE = 'NEXT_PAGE'
+export const PREV_PAGE = 'PREV_PAGE'
+export const FILTER = 'FILTER'
 
 export const requestProjects = () => ({
     type: REQUEST_PROJECTS
@@ -17,9 +20,9 @@ export const receiveProjects = projects => ({
 
 const fetchProjects = data => dispatch => {
     dispatch(requestProjects())
-    return axios.post('/projects', data)
+    return axios.post('/api/projects', data)
         .then(response => {
-            dispatch(receiveProjects(response.rows))
+            dispatch(receiveProjects(response.data.rows))
         })
 }
 
@@ -35,13 +38,19 @@ const shouldFetchProjects = (state) => {
 }
 
 export const fetchProjectsIfNeeded = () => (dispatch, getState) => {
-    const state = getState()
-    const data = (state) => ({
-        search,
-        skip,
-        limit
-    })
+    const state = getState().project_reducer
+    const data = {
+        search: state.search,
+        skip: state.skip,
+        limit: state.limit
+    }
+
     if (shouldFetchProjects(state)) {
         return dispatch(fetchProjects(data))
     }
 }
+
+export const filterProjects = search => ({
+    type: FILTER,
+    search: search
+})

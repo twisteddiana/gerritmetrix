@@ -3,12 +3,14 @@
  */
 import React from 'react';
 import { Link } from 'react-router-dom';
-import Menu from '../components/Menu'
+import Menu from '../components/static/Menu'
+import Logo from '../components/static/Logo'
 
 export const Layout = props => (
-    <div className="app-container">
-        <header>
-            <Menu></Menu>
+    <div className="container-fluid">
+        <header className="row">
+            <Logo/>
+            <Menu/>
         </header>
         <div className="app-content">{props.children}</div>
         <footer>

@@ -6,11 +6,19 @@ import React from 'react';
 import { render } from 'react-dom';
 import { BrowserRouter as Router } from 'react-router-dom';
 import { Provider } from 'react-redux'
-import { createStore } from 'redux'
+import { createStore, applyMiddleware } from 'redux'
 import App from './containers/App';
 import gerritmetrixApp from './reducers'
+import thunk from 'redux-thunk'
+import { createLogger } from 'redux-logger'
 
-let store = createStore(gerritmetrixApp)
+const middleware = [ thunk ]
+middleware.push(createLogger())
+
+let store = createStore(
+    gerritmetrixApp,
+    applyMiddleware(...middleware)
+)
 
 window.onload = () => {
     render(
