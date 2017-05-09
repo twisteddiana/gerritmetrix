@@ -8,6 +8,7 @@ export const RECEIVE_PROJECTS = 'RECEIVE_PROJECTS'
 export const NEXT_PAGE = 'NEXT_PAGE'
 export const PREV_PAGE = 'PREV_PAGE'
 export const FILTER = 'FILTER'
+export const QUERTY_STRING = 'QUERY_STRING'
 
 export const requestProjects = () => ({
     type: REQUEST_PROJECTS
@@ -52,5 +53,18 @@ export const fetchProjectsIfNeeded = () => (dispatch, getState) => {
 
 export const filterProjects = search => ({
     type: FILTER,
-    search: search
+    search: search,
+})
+
+export const nextPage = () => ({
+    type: NEXT_PAGE
+})
+
+export const prevPage = () => ({
+    type: PREV_PAGE
+})
+
+export const applyQueryString = (queryString) => ({
+    type: QUERTY_STRING,
+    params: queryString
 })

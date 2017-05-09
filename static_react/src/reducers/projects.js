@@ -3,7 +3,7 @@
  */
 import {
     REQUEST_PROJECTS, RECEIVE_PROJECTS,
-    NEXT_PAGE, PREV_PAGE, FILTER
+    NEXT_PAGE, PREV_PAGE, FILTER, QUERTY_STRING
 } from '../actions/projects'
 
 const initialState = {
@@ -39,7 +39,7 @@ const project_reducer = (state = initialState, action = {}) => {
                 isLoading: false
             }
         case PREV_PAGE:
-            if (skip > limit)
+            if (skip >= limit)
                 return {
                     ...state,
                     skip: skip - limit,
@@ -54,6 +54,14 @@ const project_reducer = (state = initialState, action = {}) => {
                 loaded: false,
                 isLoading: false
             }
+        case QUERTY_STRING:
+            let newstate = state
+            if (action.params.search)
+                newstate.search = action.params.search
+            if (action.params.skip)
+                newstate.skip = action.params.skip
+
+            return newstate
         default:
             return state
     }

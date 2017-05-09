@@ -11,9 +11,12 @@ import App from './containers/App';
 import gerritmetrixApp from './reducers'
 import thunk from 'redux-thunk'
 import { createLogger } from 'redux-logger'
+import createDebounce from 'redux-debounced';
 
-const middleware = [ thunk ]
+const middleware = []
 middleware.push(createLogger())
+middleware.push(createDebounce())
+middleware.push(thunk)
 
 let store = createStore(
     gerritmetrixApp,
