@@ -1,64 +1,69 @@
 /**
- * Created by diana on 07.05.2017.
+ * Created by diana on 09.05.2017.
  */
 import React from 'react';
 import { Link, withRouter } from 'react-router-dom';
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
-import { fetchProjectsIfNeeded, filterProjects, nextPage, prevPage, applyQueryString } from '../actions/projects'
-import { TextFilter } from './static/Filter'
+import { fetchChangesIfNeeded, selectProject, nextPage, prevPage, applyQueryString } from '../actions/project'
 import { Paging } from './static/Paging'
 import Moment from 'react-moment'
 import queryString from 'query-string'
 
-class ProjectRow extends React.Component {
+class ChangeRow extends React.Component {
     static propTypes = {
-        project: PropTypes.object.isRequired
+        change: PropTypes.object.isRequired
     }
 
     render() {
-        let { project } = this.props
-        if (!project.project)
+        let { change } = this.props
+        if (!change.number)
             return null;
 
+        let subject = change.commitMessage.split('\n')[0]
+
         return (
-            <tr key={project.project}>
+            <tr key={change.number}>
                 <td>
-                    <Link to={"/projects/"+ project.project}>
-                        {project.project}
+                    <Link to={"/changes/"+ change.number}>
+                        {change.number}
                     </Link>
                 </td>
-                <td>{project.number}</td>
-                <td>{project.status[0]}</td>
                 <td>
-                    <Moment format="do MMM Y HH:mm:ss">{project.lastUpdate * 1000}</Moment>
+                    <Link to={"/changes/"+ change.number}>
+                        {subject}
+                    </Link>
+                </td>
+                <td>{change.status}</td>
+                <td>{change.owner.name}</td>
+                <td>
+                    <Moment format="do MMM Y HH:mm:ss">{change.lastUpdate * 1000}</Moment>
                 </td>
             </tr>
         )
     }
 }
 
-export class Projects extends React.Component {
+export class Project extends React.Component {
     static propTypes = {
-        search: PropTypes.string.isRequired,
-        projects: PropTypes.array.isRequired,
+        changes: PropTypes.array.isRequired,
         isLoading: PropTypes.bool.isRequired,
         dispatch: PropTypes.func.isRequired
     }
 
-    constructor(props) {
-        super(props)
-        //this.handleFilter = debounce(200, this.handleFilter)
-    }
-
     componentWillMount() {
+        let { project_1, project_2 } = this.props.match.params
+        let { dispatch } = this.props
+        let project_name = project_1 + '/' + project_2;
+        dispatch(selectProject(project_name))
+
         let parsed = queryString.parse(this.props.location.search);
         this.props.dispatch(applyQueryString(parsed))
     }
 
     componentDidMount() {
         const { dispatch } = this.props
-        dispatch(fetchProjectsIfNeeded())
+        dispatch(fetchChangesIfNeeded())
     }
 
     handleHistory = (param, value) => {
@@ -72,11 +77,6 @@ export class Projects extends React.Component {
             pathname: this.props.location.url,
             search: this.props.location.search
         })
-    }
-
-    handleFilter = search => {
-        this.handleHistory("search", search)
-        this.props.dispatch(filterProjects(search))
     }
 
     handlePrev = () => {
@@ -94,49 +94,43 @@ export class Projects extends React.Component {
 
     componentWillReceiveProps(nextProps) {
         if (!nextProps.loaded && this.props.loaded && !nextProps.isLoading)
-            nextProps.dispatch(fetchProjectsIfNeeded())
+            nextProps.dispatch(fetchChangesIfNeeded())
     }
 
     render() {
-        const { search, projects, skip } = this.props
-        return (
+        let { project_name, changes, skip } = this.props
+        return(
             <div className="data-list">
-                <h1>Projects</h1>
+                <h1>{ project_name }</h1>
 
                 <table className="table">
                     <thead>
                     <tr>
-                        <th>Project name</th>
-                        <th>Last Change</th>
+                        <th>Change</th>
+                        <th>Subject</th>
                         <th>Status</th>
+                        <th>Owner</th>
                         <th>Date</th>
-                    </tr>
-                    <tr>
-                        <th>
-                            <TextFilter value={search} onChange={this.handleFilter} />
-                        </th>
-                        <th colSpan="3"></th>
                     </tr>
                     </thead>
                     <tbody>
-                    {projects.map((project, i) =>
-                        <ProjectRow key={i} project={project}/>
+                    {changes.map((change, i) =>
+                        <ChangeRow key={i} change={change}/>
                     )}
                     </tbody>
                     <tfoot>
-                    <Paging nb_columns={4} skip={skip} forward={this.handleNext} backward={this.handlePrev}/>
+                    <Paging nb_columns={5} skip={skip} forward={this.handleNext} backward={this.handlePrev}/>
                     </tfoot>
                 </table>
             </div>
-        );
+        )
     }
 }
 
-
 const mapStateToProps = state => {
 
-    const { project_reducer } = state
-    return project_reducer
+    const { project_changes_reducer } = state
+    return project_changes_reducer
 }
 
-export default withRouter(connect(mapStateToProps)(Projects))
+export default withRouter(connect(mapStateToProps)(Project))

@@ -9,6 +9,7 @@ import Layout from './Layout';
 import Dashboard from '../components/Dashboard'
 import NotFoundPage from '../components/NotFoundPage';
 import Projects from '../components/Projects'
+import Project from '../components/Project'
 
 class App extends Component {
     render() {
@@ -18,6 +19,7 @@ class App extends Component {
                      <Route exact path="/" component={Dashboard} />
                      <Route exact path="/dashboard" component={Dashboard} />
                      <Route exact path="/projects" component={Projects} />
+                     <Route exact path="/projects/:project_1/:project_2" component={Project} />
                      <Route component={NotFoundPage} />
                  </Switch>
              </Layout>

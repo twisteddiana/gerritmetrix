@@ -4,18 +4,49 @@
 
 import React from 'react'
 import PropTypes from 'prop-types'
+import {debounce} from 'throttle-debounce';
 
-export const TextFilter = ({ value, onChange }) => (
-    <span>
-        <input
-            type="text"
-            className="form-control"
-            value={value}
-            onChange={e => onChange(e.target.value)}
-            placeholder="Filter"
-        />
-    </span>
-)
+export class TextFilter extends React.Component {
+    constructor(props) {
+        super(props)
+        this.state = {
+            value: props.value
+        }
+        this.reduxupdate = debounce(500, this.reduxupdate)
+    }
+    componentWillMount() {
+        this.value = this.props.value
+    }
+
+    componentWillReceiveProps(nextProps) {
+        window.console.log(nextProps);
+        this.setState({value: nextProps.value})
+    }
+
+    reduxupdate(value) {
+        this.props.onChange(value)
+    }
+
+    keyup(value) {
+        this.setState({value: value})
+        this.reduxupdate(value)
+    }
+
+    render() {
+        let value = this.state.value
+        return(
+            <span>
+            <input
+                type="text"
+                value={value}
+                className="form-control"
+                onChange={e => this.keyup(e.target.value)}
+                placeholder="Filter"
+            />
+            </span>
+        )
+    }
+}
 
 TextFilter.propTypes = {
     value: PropTypes.string.isRequired,

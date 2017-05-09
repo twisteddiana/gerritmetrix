@@ -1,34 +1,41 @@
 /**
- * Created by diana on 30.04.2017.
+ * Created by diana on 09.05.2017.
  */
+
 import {
-    REQUEST_PROJECTS, RECEIVE_PROJECTS,
-    NEXT_PAGE, PREV_PAGE, FILTER, QUERTY_STRING
-} from '../actions/projects'
+    REQUEST_CHANGES, RECEIVE_CHANGES,
+    NEXT_PAGE, PREV_PAGE, QUERTY_STRING, SELECT_PROJECT
+} from '../actions/project'
 
 const initialState = {
+    project_name: "",
     limit: 20,
     skip: 0,
     search: "",
     loaded: false,
     isLoading: false,
-    projects: []
+    changes: []
 }
 
-const project_reducer = (state = initialState, action = {}) => {
+const project_changes_reducer = (state = initialState, action = {}) => {
     let {skip, limit} = state
     switch (action.type) {
-        case REQUEST_PROJECTS:
+        case SELECT_PROJECT:
+            return {
+                ...state,
+                project_name: action.project_name
+            }
+        case REQUEST_CHANGES:
             return {
                 ...state,
                 loaded: false,
                 isLoading: true
             }
-        case RECEIVE_PROJECTS:
+        case RECEIVE_CHANGES:
             return {
                 ...state,
                 loaded: true,
-                projects: action.projects,
+                changes: action.changes,
                 isLoading: false
             }
         case NEXT_PAGE:
@@ -47,18 +54,8 @@ const project_reducer = (state = initialState, action = {}) => {
                     isLoading: false
                 }
             return state
-        case FILTER:
-            return {
-                ...state,
-                skip: 0,
-                search: action.search,
-                loaded: false,
-                isLoading: false
-            }
         case QUERTY_STRING:
             let newstate = state
-            if (action.params.search)
-                newstate.search = action.params.search
             if (action.params.skip)
                 newstate.skip = action.params.skip
 
@@ -68,4 +65,4 @@ const project_reducer = (state = initialState, action = {}) => {
     }
 }
 
-export default project_reducer
+export default project_changes_reducer

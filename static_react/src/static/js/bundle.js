@@ -29694,6 +29694,8 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.TextFilter = undefined;
 
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
 var _react = __webpack_require__(5);
 
 var _react2 = _interopRequireDefault(_react);
@@ -29702,29 +29704,79 @@ var _propTypes = __webpack_require__(8);
 
 var _propTypes2 = _interopRequireDefault(_propTypes);
 
+var _throttleDebounce = __webpack_require__(443);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-/**
- * Created by diana on 08.05.2017.
- */
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var TextFilter = exports.TextFilter = function TextFilter(_ref) {
-    var value = _ref.value,
-        _onChange = _ref.onChange;
-    return _react2.default.createElement(
-        'span',
-        null,
-        _react2.default.createElement('input', {
-            type: 'text',
-            className: 'form-control',
-            value: value,
-            onChange: function onChange(e) {
-                return _onChange(e.target.value);
-            },
-            placeholder: 'Filter'
-        })
-    );
-};
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; } /**
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                * Created by diana on 08.05.2017.
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                */
+
+var TextFilter = exports.TextFilter = function (_React$Component) {
+    _inherits(TextFilter, _React$Component);
+
+    function TextFilter(props) {
+        _classCallCheck(this, TextFilter);
+
+        var _this = _possibleConstructorReturn(this, (TextFilter.__proto__ || Object.getPrototypeOf(TextFilter)).call(this, props));
+
+        _this.state = {
+            value: props.value
+        };
+        _this.reduxupdate = (0, _throttleDebounce.debounce)(500, _this.reduxupdate);
+        return _this;
+    }
+
+    _createClass(TextFilter, [{
+        key: 'componentWillMount',
+        value: function componentWillMount() {
+            this.value = this.props.value;
+        }
+    }, {
+        key: 'componentWillReceiveProps',
+        value: function componentWillReceiveProps(nextProps) {
+            window.console.log(nextProps);
+            this.setState({ value: nextProps.value });
+        }
+    }, {
+        key: 'reduxupdate',
+        value: function reduxupdate(value) {
+            this.props.onChange(value);
+        }
+    }, {
+        key: 'keyup',
+        value: function keyup(value) {
+            this.setState({ value: value });
+            this.reduxupdate(value);
+        }
+    }, {
+        key: 'render',
+        value: function render() {
+            var _this2 = this;
+
+            var value = this.state.value;
+            return _react2.default.createElement(
+                'span',
+                null,
+                _react2.default.createElement('input', {
+                    type: 'text',
+                    value: value,
+                    className: 'form-control',
+                    onChange: function onChange(e) {
+                        return _this2.keyup(e.target.value);
+                    },
+                    placeholder: 'Filter'
+                })
+            );
+        }
+    }]);
+
+    return TextFilter;
+}(_react2.default.Component);
 
 TextFilter.propTypes = {
     value: _propTypes2.default.string.isRequired,
@@ -29966,6 +30018,10 @@ var _Projects = __webpack_require__(257);
 
 var _Projects2 = _interopRequireDefault(_Projects);
 
+var _Project = __webpack_require__(438);
+
+var _Project2 = _interopRequireDefault(_Project);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -29998,6 +30054,7 @@ var App = function (_Component) {
                     _react2.default.createElement(_reactRouterDom.Route, { exact: true, path: '/', component: _Dashboard2.default }),
                     _react2.default.createElement(_reactRouterDom.Route, { exact: true, path: '/dashboard', component: _Dashboard2.default }),
                     _react2.default.createElement(_reactRouterDom.Route, { exact: true, path: '/projects', component: _Projects2.default }),
+                    _react2.default.createElement(_reactRouterDom.Route, { exact: true, path: '/projects/:project_1/:project_2', component: _Project2.default }),
                     _react2.default.createElement(_reactRouterDom.Route, { component: _NotFoundPage2.default })
                 )
             );
@@ -30086,15 +30143,18 @@ var _projects = __webpack_require__(265);
 
 var _projects2 = _interopRequireDefault(_projects);
 
+var _project = __webpack_require__(440);
+
+var _project2 = _interopRequireDefault(_project);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-/**
- * Created by diana on 30.04.2017.
- */
 var gerritmetrixApp = (0, _redux.combineReducers)({
-  project_reducer: _projects2.default
-});
-
+  project_reducer: _projects2.default,
+  project_changes_reducer: _project2.default
+}); /**
+     * Created by diana on 30.04.2017.
+     */
 exports.default = gerritmetrixApp;
 
 /***/ }),
@@ -30157,6 +30217,7 @@ var project_reducer = function project_reducer() {
             return state;
         case _projects.FILTER:
             return _extends({}, state, {
+                skip: 0,
                 search: action.search,
                 loaded: false,
                 isLoading: false
@@ -50229,6 +50290,586 @@ exports.default = function () {
 
   return middleware;
 };
+
+/***/ }),
+/* 438 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.Project = undefined;
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _react = __webpack_require__(5);
+
+var _react2 = _interopRequireDefault(_react);
+
+var _reactRouterDom = __webpack_require__(19);
+
+var _propTypes = __webpack_require__(8);
+
+var _propTypes2 = _interopRequireDefault(_propTypes);
+
+var _reactRedux = __webpack_require__(40);
+
+var _project = __webpack_require__(439);
+
+var _Paging = __webpack_require__(261);
+
+var _reactMoment = __webpack_require__(376);
+
+var _reactMoment2 = _interopRequireDefault(_reactMoment);
+
+var _queryString = __webpack_require__(304);
+
+var _queryString2 = _interopRequireDefault(_queryString);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; } /**
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                * Created by diana on 09.05.2017.
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                */
+
+
+var ChangeRow = function (_React$Component) {
+    _inherits(ChangeRow, _React$Component);
+
+    function ChangeRow() {
+        _classCallCheck(this, ChangeRow);
+
+        return _possibleConstructorReturn(this, (ChangeRow.__proto__ || Object.getPrototypeOf(ChangeRow)).apply(this, arguments));
+    }
+
+    _createClass(ChangeRow, [{
+        key: 'render',
+        value: function render() {
+            var change = this.props.change;
+
+            if (!change.number) return null;
+
+            var subject = change.commitMessage.split('\n')[0];
+
+            return _react2.default.createElement(
+                'tr',
+                { key: change.number },
+                _react2.default.createElement(
+                    'td',
+                    null,
+                    _react2.default.createElement(
+                        _reactRouterDom.Link,
+                        { to: "/changes/" + change.number },
+                        change.number
+                    )
+                ),
+                _react2.default.createElement(
+                    'td',
+                    null,
+                    _react2.default.createElement(
+                        _reactRouterDom.Link,
+                        { to: "/changes/" + change.number },
+                        subject
+                    )
+                ),
+                _react2.default.createElement(
+                    'td',
+                    null,
+                    change.status
+                ),
+                _react2.default.createElement(
+                    'td',
+                    null,
+                    change.owner.name
+                ),
+                _react2.default.createElement(
+                    'td',
+                    null,
+                    _react2.default.createElement(
+                        _reactMoment2.default,
+                        { format: 'do MMM Y HH:mm:ss' },
+                        change.lastUpdate * 1000
+                    )
+                )
+            );
+        }
+    }]);
+
+    return ChangeRow;
+}(_react2.default.Component);
+
+ChangeRow.propTypes = {
+    change: _propTypes2.default.object.isRequired
+};
+
+var Project = exports.Project = function (_React$Component2) {
+    _inherits(Project, _React$Component2);
+
+    function Project() {
+        var _ref;
+
+        var _temp, _this2, _ret;
+
+        _classCallCheck(this, Project);
+
+        for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+            args[_key] = arguments[_key];
+        }
+
+        return _ret = (_temp = (_this2 = _possibleConstructorReturn(this, (_ref = Project.__proto__ || Object.getPrototypeOf(Project)).call.apply(_ref, [this].concat(args))), _this2), _this2.handleHistory = function (param, value) {
+            var parsed = _queryString2.default.parse(_this2.props.location.search);
+            if (value) parsed[param] = value;else delete parsed[param];
+            _this2.props.location.search = _queryString2.default.stringify(parsed);
+            _this2.props.history.push({
+                pathname: _this2.props.location.url,
+                search: _this2.props.location.search
+            });
+        }, _this2.handlePrev = function () {
+            var _this2$props = _this2.props,
+                skip = _this2$props.skip,
+                limit = _this2$props.limit;
+
+
+            _this2.handleHistory("skip", Math.max(0, skip - limit));
+            _this2.props.dispatch((0, _project.prevPage)());
+        }, _this2.handleNext = function () {
+            var _this2$props2 = _this2.props,
+                skip = _this2$props2.skip,
+                limit = _this2$props2.limit;
+
+            _this2.handleHistory("skip", skip + limit);
+            _this2.props.dispatch((0, _project.nextPage)());
+        }, _temp), _possibleConstructorReturn(_this2, _ret);
+    }
+
+    _createClass(Project, [{
+        key: 'componentWillMount',
+        value: function componentWillMount() {
+            var _props$match$params = this.props.match.params,
+                project_1 = _props$match$params.project_1,
+                project_2 = _props$match$params.project_2;
+            var dispatch = this.props.dispatch;
+
+            var project_name = project_1 + '/' + project_2;
+            dispatch((0, _project.selectProject)(project_name));
+
+            var parsed = _queryString2.default.parse(this.props.location.search);
+            this.props.dispatch((0, _project.applyQueryString)(parsed));
+        }
+    }, {
+        key: 'componentDidMount',
+        value: function componentDidMount() {
+            var dispatch = this.props.dispatch;
+
+            dispatch((0, _project.fetchChangesIfNeeded)());
+        }
+    }, {
+        key: 'componentWillReceiveProps',
+        value: function componentWillReceiveProps(nextProps) {
+            if (!nextProps.loaded && this.props.loaded && !nextProps.isLoading) nextProps.dispatch((0, _project.fetchChangesIfNeeded)());
+        }
+    }, {
+        key: 'render',
+        value: function render() {
+            var _props = this.props,
+                project_name = _props.project_name,
+                changes = _props.changes,
+                skip = _props.skip;
+
+            return _react2.default.createElement(
+                'div',
+                { className: 'data-list' },
+                _react2.default.createElement(
+                    'h1',
+                    null,
+                    project_name
+                ),
+                _react2.default.createElement(
+                    'table',
+                    { className: 'table' },
+                    _react2.default.createElement(
+                        'thead',
+                        null,
+                        _react2.default.createElement(
+                            'tr',
+                            null,
+                            _react2.default.createElement(
+                                'th',
+                                null,
+                                'Change'
+                            ),
+                            _react2.default.createElement(
+                                'th',
+                                null,
+                                'Subject'
+                            ),
+                            _react2.default.createElement(
+                                'th',
+                                null,
+                                'Status'
+                            ),
+                            _react2.default.createElement(
+                                'th',
+                                null,
+                                'Owner'
+                            ),
+                            _react2.default.createElement(
+                                'th',
+                                null,
+                                'Date'
+                            )
+                        )
+                    ),
+                    _react2.default.createElement(
+                        'tbody',
+                        null,
+                        changes.map(function (change, i) {
+                            return _react2.default.createElement(ChangeRow, { key: i, change: change });
+                        })
+                    ),
+                    _react2.default.createElement(
+                        'tfoot',
+                        null,
+                        _react2.default.createElement(_Paging.Paging, { nb_columns: 5, skip: skip, forward: this.handleNext, backward: this.handlePrev })
+                    )
+                )
+            );
+        }
+    }]);
+
+    return Project;
+}(_react2.default.Component);
+
+Project.propTypes = {
+    changes: _propTypes2.default.array.isRequired,
+    isLoading: _propTypes2.default.bool.isRequired,
+    dispatch: _propTypes2.default.func.isRequired
+};
+
+
+var mapStateToProps = function mapStateToProps(state) {
+    var project_changes_reducer = state.project_changes_reducer;
+
+    return project_changes_reducer;
+};
+
+exports.default = (0, _reactRouterDom.withRouter)((0, _reactRedux.connect)(mapStateToProps)(Project));
+
+/***/ }),
+/* 439 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.applyQueryString = exports.selectProject = exports.prevPage = exports.nextPage = exports.fetchChangesIfNeeded = exports.receiveChanges = exports.requestChanges = exports.QUERTY_STRING = exports.PREV_PAGE = exports.NEXT_PAGE = exports.RECEIVE_CHANGES = exports.REQUEST_CHANGES = exports.SELECT_PROJECT = undefined;
+
+var _axios = __webpack_require__(237);
+
+var _axios2 = _interopRequireDefault(_axios);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var SELECT_PROJECT = exports.SELECT_PROJECT = 'SELECT_PROJECT'; /**
+                                                                 * Created by diana on 09.05.2017.
+                                                                 */
+var REQUEST_CHANGES = exports.REQUEST_CHANGES = 'REQUEST_CHANGES';
+var RECEIVE_CHANGES = exports.RECEIVE_CHANGES = 'RECEIVE_CHANGES';
+var NEXT_PAGE = exports.NEXT_PAGE = 'NEXT_PAGE';
+var PREV_PAGE = exports.PREV_PAGE = 'PREV_PAGE';
+var QUERTY_STRING = exports.QUERTY_STRING = 'QUERY_STRING';
+
+var requestChanges = exports.requestChanges = function requestChanges() {
+    return {
+        type: REQUEST_CHANGES
+    };
+};
+
+var receiveChanges = exports.receiveChanges = function receiveChanges(changes) {
+    return {
+        type: RECEIVE_CHANGES,
+        changes: changes
+    };
+};
+
+var fetchChanges = function fetchChanges(data) {
+    return function (dispatch) {
+        dispatch(requestChanges());
+        return _axios2.default.post('/api/project', data).then(function (response) {
+            dispatch(receiveChanges(response.data.rows));
+        });
+    };
+};
+
+var shouldFetchChanges = function shouldFetchChanges(state) {
+    var changes = state.changes;
+    if (!changes) return true;
+    if (state.isLoading) return false;
+    if (state.loaded) return false;
+    return true;
+};
+
+var fetchChangesIfNeeded = exports.fetchChangesIfNeeded = function fetchChangesIfNeeded() {
+    return function (dispatch, getState) {
+        var state = getState().project_changes_reducer;
+        var data = {
+            project_name: state.project_name,
+            skip: state.skip,
+            limit: state.limit
+        };
+
+        if (shouldFetchChanges(state)) {
+            return dispatch(fetchChanges(data));
+        }
+    };
+};
+
+var nextPage = exports.nextPage = function nextPage() {
+    return {
+        type: NEXT_PAGE
+    };
+};
+
+var prevPage = exports.prevPage = function prevPage() {
+    return {
+        type: PREV_PAGE
+    };
+};
+
+var selectProject = exports.selectProject = function selectProject(project_name) {
+    return {
+        type: SELECT_PROJECT,
+        project_name: project_name
+    };
+};
+
+var applyQueryString = exports.applyQueryString = function applyQueryString(queryString) {
+    return {
+        type: QUERTY_STRING,
+        params: queryString
+    };
+};
+
+/***/ }),
+/* 440 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; /**
+                                                                                                                                                                                                                                                                   * Created by diana on 09.05.2017.
+                                                                                                                                                                                                                                                                   */
+
+var _project = __webpack_require__(439);
+
+var initialState = {
+    project_name: "",
+    limit: 20,
+    skip: 0,
+    search: "",
+    loaded: false,
+    isLoading: false,
+    changes: []
+};
+
+var project_changes_reducer = function project_changes_reducer() {
+    var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : initialState;
+    var action = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+    var skip = state.skip,
+        limit = state.limit;
+
+    switch (action.type) {
+        case _project.SELECT_PROJECT:
+            return _extends({}, state, {
+                project_name: action.project_name
+            });
+        case _project.REQUEST_CHANGES:
+            return _extends({}, state, {
+                loaded: false,
+                isLoading: true
+            });
+        case _project.RECEIVE_CHANGES:
+            return _extends({}, state, {
+                loaded: true,
+                changes: action.changes,
+                isLoading: false
+            });
+        case _project.NEXT_PAGE:
+            return _extends({}, state, {
+                skip: skip + limit,
+                loaded: false,
+                isLoading: false
+            });
+        case _project.PREV_PAGE:
+            if (skip >= limit) return _extends({}, state, {
+                skip: skip - limit,
+                loaded: false,
+                isLoading: false
+            });
+            return state;
+        case _project.QUERTY_STRING:
+            var newstate = state;
+            if (action.params.skip) newstate.skip = action.params.skip;
+
+            return newstate;
+        default:
+            return state;
+    }
+};
+
+exports.default = project_changes_reducer;
+
+/***/ }),
+/* 441 */
+/***/ (function(module, exports) {
+
+/* eslint-disable no-undefined,no-param-reassign,no-shadow */
+
+/**
+ * Throttle execution of a function. Especially useful for rate limiting
+ * execution of handlers on events like resize and scroll.
+ *
+ * @param  {Number}    delay          A zero-or-greater delay in milliseconds. For event callbacks, values around 100 or 250 (or even higher) are most useful.
+ * @param  {Boolean}   noTrailing     Optional, defaults to false. If noTrailing is true, callback will only execute every `delay` milliseconds while the
+ *                                    throttled-function is being called. If noTrailing is false or unspecified, callback will be executed one final time
+ *                                    after the last throttled-function call. (After the throttled-function has not been called for `delay` milliseconds,
+ *                                    the internal counter is reset)
+ * @param  {Function}  callback       A function to be executed after delay milliseconds. The `this` context and all arguments are passed through, as-is,
+ *                                    to `callback` when the throttled-function is executed.
+ * @param  {Boolean}   debounceMode   If `debounceMode` is true (at begin), schedule `clear` to execute after `delay` ms. If `debounceMode` is false (at end),
+ *                                    schedule `callback` to execute after `delay` ms.
+ *
+ * @return {Function}  A new, throttled, function.
+ */
+module.exports = function ( delay, noTrailing, callback, debounceMode ) {
+
+	// After wrapper has stopped being called, this timeout ensures that
+	// `callback` is executed at the proper times in `throttle` and `end`
+	// debounce modes.
+	var timeoutID;
+
+	// Keep track of the last time `callback` was executed.
+	var lastExec = 0;
+
+	// `noTrailing` defaults to falsy.
+	if ( typeof noTrailing !== 'boolean' ) {
+		debounceMode = callback;
+		callback = noTrailing;
+		noTrailing = undefined;
+	}
+
+	// The `wrapper` function encapsulates all of the throttling / debouncing
+	// functionality and when executed will limit the rate at which `callback`
+	// is executed.
+	function wrapper () {
+
+		var self = this;
+		var elapsed = Number(new Date()) - lastExec;
+		var args = arguments;
+
+		// Execute `callback` and update the `lastExec` timestamp.
+		function exec () {
+			lastExec = Number(new Date());
+			callback.apply(self, args);
+		}
+
+		// If `debounceMode` is true (at begin) this is used to clear the flag
+		// to allow future `callback` executions.
+		function clear () {
+			timeoutID = undefined;
+		}
+
+		if ( debounceMode && !timeoutID ) {
+			// Since `wrapper` is being called for the first time and
+			// `debounceMode` is true (at begin), execute `callback`.
+			exec();
+		}
+
+		// Clear any existing timeout.
+		if ( timeoutID ) {
+			clearTimeout(timeoutID);
+		}
+
+		if ( debounceMode === undefined && elapsed > delay ) {
+			// In throttle mode, if `delay` time has been exceeded, execute
+			// `callback`.
+			exec();
+
+		} else if ( noTrailing !== true ) {
+			// In trailing throttle mode, since `delay` time has not been
+			// exceeded, schedule `callback` to execute `delay` ms after most
+			// recent execution.
+			//
+			// If `debounceMode` is true (at begin), schedule `clear` to execute
+			// after `delay` ms.
+			//
+			// If `debounceMode` is false (at end), schedule `callback` to
+			// execute after `delay` ms.
+			timeoutID = setTimeout(debounceMode ? clear : exec, debounceMode === undefined ? delay - elapsed : delay);
+		}
+
+	}
+
+	// Return the wrapper function.
+	return wrapper;
+
+};
+
+
+/***/ }),
+/* 442 */
+/***/ (function(module, exports, __webpack_require__) {
+
+/* eslint-disable no-undefined */
+
+var throttle = __webpack_require__(441);
+
+/**
+ * Debounce execution of a function. Debouncing, unlike throttling,
+ * guarantees that a function is only executed a single time, either at the
+ * very beginning of a series of calls, or at the very end.
+ *
+ * @param  {Number}   delay         A zero-or-greater delay in milliseconds. For event callbacks, values around 100 or 250 (or even higher) are most useful.
+ * @param  {Boolean}  atBegin       Optional, defaults to false. If atBegin is false or unspecified, callback will only be executed `delay` milliseconds
+ *                                  after the last debounced-function call. If atBegin is true, callback will be executed only at the first debounced-function call.
+ *                                  (After the throttled-function has not been called for `delay` milliseconds, the internal counter is reset).
+ * @param  {Function} callback      A function to be executed after delay milliseconds. The `this` context and all arguments are passed through, as-is,
+ *                                  to `callback` when the debounced-function is executed.
+ *
+ * @return {Function} A new, debounced function.
+ */
+module.exports = function ( delay, atBegin, callback ) {
+	return callback === undefined ? throttle(delay, atBegin, false) : throttle(delay, callback, atBegin !== false);
+};
+
+
+/***/ }),
+/* 443 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var throttle = __webpack_require__(441);
+var debounce = __webpack_require__(442);
+
+module.exports = {
+	throttle: throttle,
+	debounce: debounce
+};
+
 
 /***/ })
 /******/ ]);
