@@ -28,7 +28,7 @@ const fetchProjects = data => dispatch => {
 }
 
 const shouldFetchProjects = (state) => {
-    const projects = state.collection;
+    const projects = state.projects;
     if (!projects)
         return true;
     if (state.isLoading)

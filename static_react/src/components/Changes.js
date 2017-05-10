@@ -1,47 +1,56 @@
 /**
- * Created by diana on 07.05.2017.
+ * Created by diana on 10.05.2017.
  */
 import React from 'react';
 import { Link, withRouter } from 'react-router-dom';
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
-import { fetchProjectsIfNeeded, filterProjects, nextPage, prevPage, applyQueryString } from '../actions/projects'
-import { TextFilter } from './static/Filter'
+import { fetchChangesIfNeeded, filterChanges, nextPage, prevPage, applyQueryString } from '../actions/changes'
+import { TextFilter, MultiselectFilter } from './static/Filter'
 import { Paging } from './static/Paging'
 import Moment from 'react-moment'
 import queryString from 'query-string'
 
-class ProjectRow extends React.Component {
+class ChangeRow extends React.Component {
     static propTypes = {
-        project: PropTypes.object.isRequired
+        change: PropTypes.object.isRequired
     }
 
     render() {
-        let { project } = this.props
-        if (!project.project)
+        let { change } = this.props
+        if (!change.number)
             return null;
 
+        let subject = change.commitMessage.split("\n")[0]
+
         return (
-            <tr key={project.project}>
+            <tr key={change.number}>
                 <td>
-                    <Link to={"/projects/"+ project.project}>
-                        {project.project}
+                    <Link to={"/projects/"+ change.project}>
+                        {change.project}
                     </Link>
                 </td>
-                <td>{project.number}</td>
-                <td>{project.status[0]}</td>
+                <td>{subject}</td>
+                <td>{change.owner.name}</td>
                 <td>
-                    <Moment format="do MMM Y HH:mm:ss">{project.lastUpdate * 1000}</Moment>
+                    <Link to={"/changes/"+ change.number}>
+                        {change.number}
+                    </Link>
+                </td>
+                <td>{change.status}</td>
+                <td>
+                    <Moment format="do MMM Y HH:mm:ss">{change.lastUpdate * 1000}</Moment>
                 </td>
             </tr>
         )
     }
 }
 
-export class Projects extends React.Component {
+export class Changes extends React.Component {
     static propTypes = {
         search: PropTypes.string.isRequired,
-        projects: PropTypes.array.isRequired,
+        status: PropTypes.array.isRequired,
+        changes: PropTypes.array.isRequired,
         isLoading: PropTypes.bool.isRequired,
         dispatch: PropTypes.func.isRequired
     }
@@ -57,7 +66,7 @@ export class Projects extends React.Component {
 
     componentDidMount() {
         const { dispatch } = this.props
-        dispatch(fetchProjectsIfNeeded())
+        dispatch(fetchChangesIfNeeded())
     }
 
     handleHistory = (param, value) => {
@@ -73,10 +82,16 @@ export class Projects extends React.Component {
         })
     }
 
-    handleFilter = search => {
+    handleFilter = (search, status) => {
         this.handleHistory("search", search)
         this.handleHistory("skip", 0);
-        this.props.dispatch(filterProjects(search))
+        this.props.dispatch(filterChanges(search, this.props.status))
+    }
+
+    handleStatus = (status) => {
+        this.handleHistory("status", status)
+        this.handleHistory("skip", 0);
+        this.props.dispatch(filterChanges(this.props.search, status))
     }
 
     handlePrev = () => {
@@ -94,11 +109,17 @@ export class Projects extends React.Component {
 
     componentWillReceiveProps(nextProps) {
         if (!nextProps.loaded && this.props.loaded && !nextProps.isLoading)
-            nextProps.dispatch(fetchProjectsIfNeeded())
+            nextProps.dispatch(fetchChangesIfNeeded())
     }
 
     render() {
-        const { search, projects, skip } = this.props
+        const { search, changes, skip, status } = this.props
+        const status_values = [
+            {label: 'All', value: 'ALL'},
+            {label: 'New', value: 'NEW'},
+            {label: 'Merged', value: 'MERGED'},
+            {label: 'Abandoned', value: 'ABANDONED'}
+        ]
         return (
             <div className="data-list">
                 <h1>Projects</h1>
@@ -107,7 +128,9 @@ export class Projects extends React.Component {
                     <thead>
                     <tr>
                         <th>Project name</th>
-                        <th>Last Change</th>
+                        <th>Subject</th>
+                        <th>Owner</th>
+                        <th>Number</th>
                         <th>Status</th>
                         <th>Date</th>
                     </tr>
@@ -116,15 +139,18 @@ export class Projects extends React.Component {
                             <TextFilter value={search} onChange={this.handleFilter} />
                         </th>
                         <th colSpan="3"></th>
+                        <th>
+                            <MultiselectFilter value={status} onChange={this.handleStatus} values={status_values}/>
+                        </th>
                     </tr>
                     </thead>
                     <tbody>
-                    {projects.map((project, i) =>
-                        <ProjectRow key={i} project={project}/>
+                    {changes.map((change, i) =>
+                        <ChangeRow key={i} change={change}/>
                     )}
                     </tbody>
                     <tfoot>
-                    <Paging nb_columns={4} skip={skip} forward={this.handleNext} backward={this.handlePrev}/>
+                    <Paging nb_columns={6} skip={parseInt(skip)} forward={this.handleNext} backward={this.handlePrev}/>
                     </tfoot>
                 </table>
             </div>
@@ -135,8 +161,8 @@ export class Projects extends React.Component {
 
 const mapStateToProps = state => {
 
-    const { project_reducer } = state
-    return project_reducer
+    const { changes_reducer } = state
+    return changes_reducer
 }
 
-export default withRouter(connect(mapStateToProps)(Projects))
+export default withRouter(connect(mapStateToProps)(Changes))

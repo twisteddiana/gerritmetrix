@@ -12748,7 +12748,7 @@ var fetchProjects = function fetchProjects(data) {
 };
 
 var shouldFetchProjects = function shouldFetchProjects(state) {
-    var projects = state.collection;
+    var projects = state.projects;
     if (!projects) return true;
     if (state.isLoading) return false;
     if (state.loaded) return false;
@@ -29531,7 +29531,6 @@ var Projects = exports.Projects = function (_React$Component2) {
     function Projects(props) {
         _classCallCheck(this, Projects);
 
-        //this.handleFilter = debounce(200, this.handleFilter)
         var _this2 = _possibleConstructorReturn(this, (Projects.__proto__ || Object.getPrototypeOf(Projects)).call(this, props));
 
         _this2.handleHistory = function (param, value) {
@@ -29546,6 +29545,7 @@ var Projects = exports.Projects = function (_React$Component2) {
 
         _this2.handleFilter = function (search) {
             _this2.handleHistory("search", search);
+            _this2.handleHistory("skip", 0);
             _this2.props.dispatch((0, _projects.filterProjects)(search));
         };
 
@@ -29692,7 +29692,7 @@ exports.default = (0, _reactRouterDom.withRouter)((0, _reactRedux.connect)(mapSt
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-exports.TextFilter = undefined;
+exports.MultiselectFilter = exports.TextFilter = undefined;
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
@@ -29725,9 +29725,11 @@ var TextFilter = exports.TextFilter = function (_React$Component) {
         var _this = _possibleConstructorReturn(this, (TextFilter.__proto__ || Object.getPrototypeOf(TextFilter)).call(this, props));
 
         _this.state = {
-            value: props.value
+            value: props.value,
+            timer: null,
+            interval: 500
         };
-        _this.reduxupdate = (0, _throttleDebounce.debounce)(500, _this.reduxupdate);
+        _this.reduxupdate = (0, _throttleDebounce.debounce)(20, _this.reduxupdate);
         return _this;
     }
 
@@ -29739,7 +29741,6 @@ var TextFilter = exports.TextFilter = function (_React$Component) {
     }, {
         key: 'componentWillReceiveProps',
         value: function componentWillReceiveProps(nextProps) {
-            window.console.log(nextProps);
             this.setState({ value: nextProps.value });
         }
     }, {
@@ -29750,13 +29751,20 @@ var TextFilter = exports.TextFilter = function (_React$Component) {
     }, {
         key: 'keyup',
         value: function keyup(value) {
+            var _this2 = this;
+
             this.setState({ value: value });
-            this.reduxupdate(value);
+            clearTimeout(this.state.timer);
+            this.setState({
+                timer: setTimeout(function () {
+                    _this2.reduxupdate(value);
+                }, this.state.interval)
+            });
         }
     }, {
         key: 'render',
         value: function render() {
-            var _this2 = this;
+            var _this3 = this;
 
             var value = this.state.value;
             return _react2.default.createElement(
@@ -29767,7 +29775,7 @@ var TextFilter = exports.TextFilter = function (_React$Component) {
                     value: value,
                     className: 'form-control',
                     onChange: function onChange(e) {
-                        return _this2.keyup(e.target.value);
+                        return _this3.keyup(e.target.value);
                     },
                     placeholder: 'Filter'
                 })
@@ -29780,6 +29788,93 @@ var TextFilter = exports.TextFilter = function (_React$Component) {
 
 TextFilter.propTypes = {
     value: _propTypes2.default.string.isRequired,
+    onChange: _propTypes2.default.func.isRequired
+};
+
+var selectOption = function (_React$Component2) {
+    _inherits(selectOption, _React$Component2);
+
+    function selectOption() {
+        _classCallCheck(this, selectOption);
+
+        return _possibleConstructorReturn(this, (selectOption.__proto__ || Object.getPrototypeOf(selectOption)).apply(this, arguments));
+    }
+
+    _createClass(selectOption, [{
+        key: 'render',
+        value: function render() {
+            var _props = this.props,
+                value = _props.value,
+                label = _props.label,
+                selected = _props.selected;
+
+            var is_selected = false;
+            if (selected.indexOf(value) > -1) is_selected = true;
+            window.console.log("????");
+            if (is_selected) return _react2.default.createElement(
+                'option',
+                { value: value, selected: 'selected' },
+                label
+            );else return _react2.default.createElement(
+                'option',
+                { value: value },
+                label
+            );
+        }
+    }]);
+
+    return selectOption;
+}(_react2.default.Component);
+
+selectOption.propTypes = {
+    value: _propTypes2.default.string.isRequired,
+    label: _propTypes2.default.string.isRequired,
+    selected: _propTypes2.default.array
+};
+
+var MultiselectFilter = exports.MultiselectFilter = function (_React$Component3) {
+    _inherits(MultiselectFilter, _React$Component3);
+
+    function MultiselectFilter() {
+        _classCallCheck(this, MultiselectFilter);
+
+        return _possibleConstructorReturn(this, (MultiselectFilter.__proto__ || Object.getPrototypeOf(MultiselectFilter)).apply(this, arguments));
+    }
+
+    _createClass(MultiselectFilter, [{
+        key: 'render',
+        value: function render() {
+            var _props2 = this.props,
+                value = _props2.value,
+                values = _props2.values,
+                _onChange = _props2.onChange;
+
+            return _react2.default.createElement(
+                'span',
+                null,
+                _react2.default.createElement(
+                    'select',
+                    { className: 'form-control', multiple: 'multiple', onChange: function onChange(e) {
+                            return _onChange(e.target.value);
+                        }, value: value },
+                    values.map(function (option, i) {
+                        return _react2.default.createElement(
+                            'option',
+                            { key: i, value: option.value },
+                            option.label
+                        );
+                    })
+                )
+            );
+        }
+    }]);
+
+    return MultiselectFilter;
+}(_react2.default.Component);
+
+MultiselectFilter.propTypes = {
+    values: _propTypes2.default.array.isRequired,
+    value: _propTypes2.default.array.isRequired,
     onChange: _propTypes2.default.func.isRequired
 };
 
@@ -29893,6 +29988,15 @@ var Menu = exports.Menu = function (_React$Component) {
                             _reactRouterDom.NavLink,
                             { activeClassName: 'active', to: '/projects' },
                             'Projects'
+                        )
+                    ),
+                    _react2.default.createElement(
+                        'li',
+                        null,
+                        _react2.default.createElement(
+                            _reactRouterDom.NavLink,
+                            { activeClassName: 'active', to: '/changes' },
+                            'Changes'
                         )
                     )
                 )
@@ -30022,6 +30126,10 @@ var _Project = __webpack_require__(438);
 
 var _Project2 = _interopRequireDefault(_Project);
 
+var _Changes = __webpack_require__(446);
+
+var _Changes2 = _interopRequireDefault(_Changes);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -30055,6 +30163,7 @@ var App = function (_Component) {
                     _react2.default.createElement(_reactRouterDom.Route, { exact: true, path: '/dashboard', component: _Dashboard2.default }),
                     _react2.default.createElement(_reactRouterDom.Route, { exact: true, path: '/projects', component: _Projects2.default }),
                     _react2.default.createElement(_reactRouterDom.Route, { exact: true, path: '/projects/:project_1/:project_2', component: _Project2.default }),
+                    _react2.default.createElement(_reactRouterDom.Route, { exact: true, path: '/changes', component: _Changes2.default }),
                     _react2.default.createElement(_reactRouterDom.Route, { component: _NotFoundPage2.default })
                 )
             );
@@ -30134,7 +30243,7 @@ exports.default = Layout;
 
 
 Object.defineProperty(exports, "__esModule", {
-  value: true
+    value: true
 });
 
 var _redux = __webpack_require__(68);
@@ -30147,14 +30256,21 @@ var _project = __webpack_require__(440);
 
 var _project2 = _interopRequireDefault(_project);
 
+var _changes = __webpack_require__(445);
+
+var _changes2 = _interopRequireDefault(_changes);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+/**
+ * Created by diana on 30.04.2017.
+ */
 var gerritmetrixApp = (0, _redux.combineReducers)({
-  project_reducer: _projects2.default,
-  project_changes_reducer: _project2.default
-}); /**
-     * Created by diana on 30.04.2017.
-     */
+    project_reducer: _projects2.default,
+    project_changes_reducer: _project2.default,
+    changes_reducer: _changes2.default
+});
+
 exports.default = gerritmetrixApp;
 
 /***/ }),
@@ -50696,7 +50812,11 @@ var project_changes_reducer = function project_changes_reducer() {
     switch (action.type) {
         case _project.SELECT_PROJECT:
             return _extends({}, state, {
-                project_name: action.project_name
+                project_name: action.project_name,
+                loaded: false,
+                isLoading: false,
+                changes: [],
+                skip: 0
             });
         case _project.REQUEST_CHANGES:
             return _extends({}, state, {
@@ -50870,6 +50990,498 @@ module.exports = {
 	debounce: debounce
 };
 
+
+/***/ }),
+/* 444 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.applyQueryString = exports.prevPage = exports.nextPage = exports.filterChanges = exports.fetchChangesIfNeeded = exports.receiveChanges = exports.requestChanges = exports.QUERTY_STRING = exports.FILTER = exports.PREV_PAGE = exports.NEXT_PAGE = exports.RECEIVE_CHANGES = exports.REQUEST_CHANGES = undefined;
+
+var _axios = __webpack_require__(237);
+
+var _axios2 = _interopRequireDefault(_axios);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var REQUEST_CHANGES = exports.REQUEST_CHANGES = 'REQUEST_CHANGES'; /**
+                                                                    * Created by diana on 10.05.2017.
+                                                                    */
+var RECEIVE_CHANGES = exports.RECEIVE_CHANGES = 'RECEIVE_CHANGES';
+var NEXT_PAGE = exports.NEXT_PAGE = 'NEXT_PAGE';
+var PREV_PAGE = exports.PREV_PAGE = 'PREV_PAGE';
+var FILTER = exports.FILTER = 'FILTER';
+var QUERTY_STRING = exports.QUERTY_STRING = 'QUERY_STRING';
+
+var requestChanges = exports.requestChanges = function requestChanges() {
+    return {
+        type: REQUEST_CHANGES
+    };
+};
+
+var receiveChanges = exports.receiveChanges = function receiveChanges(changes) {
+    return {
+        type: RECEIVE_CHANGES,
+        changes: changes
+    };
+};
+
+var fetchChanges = function fetchChanges(data) {
+    return function (dispatch) {
+        dispatch(requestChanges());
+        return _axios2.default.post('/api/changes', data).then(function (response) {
+            dispatch(receiveChanges(response.data.rows));
+        });
+    };
+};
+
+var shouldFetchChanges = function shouldFetchChanges(state) {
+    var changes = state.changes;
+    if (!changes) return true;
+    if (state.isLoading) return false;
+    if (state.loaded) return false;
+    return true;
+};
+
+var fetchChangesIfNeeded = exports.fetchChangesIfNeeded = function fetchChangesIfNeeded() {
+    return function (dispatch, getState) {
+        var state = getState().changes_reducer;
+        var data = {
+            search: {
+                project: state.search,
+                status: state.status
+            },
+            skip: state.skip,
+            limit: state.limit
+        };
+
+        if (shouldFetchChanges(state)) {
+            return dispatch(fetchChanges(data));
+        }
+    };
+};
+
+var filterChanges = exports.filterChanges = function filterChanges(search, status) {
+    return {
+        type: FILTER,
+        search: search,
+        status: typeof status == 'Array' ? status : [status]
+    };
+};
+
+var nextPage = exports.nextPage = function nextPage() {
+    return {
+        type: NEXT_PAGE
+    };
+};
+
+var prevPage = exports.prevPage = function prevPage() {
+    return {
+        type: PREV_PAGE
+    };
+};
+
+var applyQueryString = exports.applyQueryString = function applyQueryString(queryString) {
+    return {
+        type: QUERTY_STRING,
+        params: queryString
+    };
+};
+
+/***/ }),
+/* 445 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; /**
+                                                                                                                                                                                                                                                                   * Created by diana on 10.05.2017.
+                                                                                                                                                                                                                                                                   */
+/**
+ * Created by diana on 30.04.2017.
+ */
+
+
+var _changes = __webpack_require__(444);
+
+var initialState = {
+    limit: 20,
+    skip: 0,
+    search: "",
+    status: ["ALL"],
+    loaded: false,
+    isLoading: false,
+    changes: []
+};
+
+var changes_reducer = function changes_reducer() {
+    var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : initialState;
+    var action = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+    var skip = state.skip,
+        limit = state.limit;
+
+    switch (action.type) {
+        case _changes.REQUEST_CHANGES:
+            return _extends({}, state, {
+                loaded: false,
+                isLoading: true
+            });
+        case _changes.RECEIVE_CHANGES:
+            return _extends({}, state, {
+                loaded: true,
+                changes: action.changes,
+                isLoading: false
+            });
+        case _changes.NEXT_PAGE:
+            return _extends({}, state, {
+                skip: skip * 1 + limit,
+                loaded: false,
+                isLoading: false
+            });
+        case _changes.PREV_PAGE:
+            if (skip >= limit) return _extends({}, state, {
+                skip: skip - limit,
+                loaded: false,
+                isLoading: false
+            });
+            return state;
+        case _changes.FILTER:
+            return _extends({}, state, {
+                skip: 0,
+                search: action.search,
+                status: action.status,
+                loaded: false,
+                isLoading: false
+            });
+        case _changes.QUERTY_STRING:
+            var newstate = state;
+            if (action.params.search) newstate.search = action.params.search;
+            if (action.params.skip) newstate.skip = parseInt(action.params.skip);
+            if (action.params.status) newstate.status = action.params.status;
+
+            return newstate;
+        default:
+            return state;
+    }
+};
+
+exports.default = changes_reducer;
+
+/***/ }),
+/* 446 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.Changes = undefined;
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _react = __webpack_require__(5);
+
+var _react2 = _interopRequireDefault(_react);
+
+var _reactRouterDom = __webpack_require__(19);
+
+var _propTypes = __webpack_require__(8);
+
+var _propTypes2 = _interopRequireDefault(_propTypes);
+
+var _reactRedux = __webpack_require__(40);
+
+var _changes = __webpack_require__(444);
+
+var _Filter = __webpack_require__(258);
+
+var _Paging = __webpack_require__(261);
+
+var _reactMoment = __webpack_require__(376);
+
+var _reactMoment2 = _interopRequireDefault(_reactMoment);
+
+var _queryString = __webpack_require__(304);
+
+var _queryString2 = _interopRequireDefault(_queryString);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; } /**
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                * Created by diana on 10.05.2017.
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                */
+
+
+var ChangeRow = function (_React$Component) {
+    _inherits(ChangeRow, _React$Component);
+
+    function ChangeRow() {
+        _classCallCheck(this, ChangeRow);
+
+        return _possibleConstructorReturn(this, (ChangeRow.__proto__ || Object.getPrototypeOf(ChangeRow)).apply(this, arguments));
+    }
+
+    _createClass(ChangeRow, [{
+        key: 'render',
+        value: function render() {
+            var change = this.props.change;
+
+            if (!change.number) return null;
+
+            var subject = change.commitMessage.split("\n")[0];
+
+            return _react2.default.createElement(
+                'tr',
+                { key: change.number },
+                _react2.default.createElement(
+                    'td',
+                    null,
+                    _react2.default.createElement(
+                        _reactRouterDom.Link,
+                        { to: "/projects/" + change.project },
+                        change.project
+                    )
+                ),
+                _react2.default.createElement(
+                    'td',
+                    null,
+                    subject
+                ),
+                _react2.default.createElement(
+                    'td',
+                    null,
+                    change.owner.name
+                ),
+                _react2.default.createElement(
+                    'td',
+                    null,
+                    _react2.default.createElement(
+                        _reactRouterDom.Link,
+                        { to: "/changes/" + change.number },
+                        change.number
+                    )
+                ),
+                _react2.default.createElement(
+                    'td',
+                    null,
+                    change.status
+                ),
+                _react2.default.createElement(
+                    'td',
+                    null,
+                    _react2.default.createElement(
+                        _reactMoment2.default,
+                        { format: 'do MMM Y HH:mm:ss' },
+                        change.lastUpdate * 1000
+                    )
+                )
+            );
+        }
+    }]);
+
+    return ChangeRow;
+}(_react2.default.Component);
+
+ChangeRow.propTypes = {
+    change: _propTypes2.default.object.isRequired
+};
+
+var Changes = exports.Changes = function (_React$Component2) {
+    _inherits(Changes, _React$Component2);
+
+    function Changes(props) {
+        _classCallCheck(this, Changes);
+
+        var _this2 = _possibleConstructorReturn(this, (Changes.__proto__ || Object.getPrototypeOf(Changes)).call(this, props));
+
+        _this2.handleHistory = function (param, value) {
+            var parsed = _queryString2.default.parse(_this2.props.location.search);
+            if (value) parsed[param] = value;else delete parsed[param];
+            _this2.props.location.search = _queryString2.default.stringify(parsed);
+            _this2.props.history.push({
+                pathname: _this2.props.location.url,
+                search: _this2.props.location.search
+            });
+        };
+
+        _this2.handleFilter = function (search, status) {
+            _this2.handleHistory("search", search);
+            _this2.handleHistory("skip", 0);
+            _this2.props.dispatch((0, _changes.filterChanges)(search, _this2.props.status));
+        };
+
+        _this2.handleStatus = function (status) {
+            _this2.handleHistory("status", status);
+            _this2.handleHistory("skip", 0);
+            _this2.props.dispatch((0, _changes.filterChanges)(_this2.props.search, status));
+        };
+
+        _this2.handlePrev = function () {
+            var _this2$props = _this2.props,
+                skip = _this2$props.skip,
+                limit = _this2$props.limit;
+
+
+            _this2.handleHistory("skip", Math.max(0, skip - limit));
+            _this2.props.dispatch((0, _changes.prevPage)());
+        };
+
+        _this2.handleNext = function () {
+            var _this2$props2 = _this2.props,
+                skip = _this2$props2.skip,
+                limit = _this2$props2.limit;
+
+            _this2.handleHistory("skip", skip + limit);
+            _this2.props.dispatch((0, _changes.nextPage)());
+        };
+
+        return _this2;
+    }
+
+    _createClass(Changes, [{
+        key: 'componentWillMount',
+        value: function componentWillMount() {
+            var parsed = _queryString2.default.parse(this.props.location.search);
+            this.props.dispatch((0, _changes.applyQueryString)(parsed));
+        }
+    }, {
+        key: 'componentDidMount',
+        value: function componentDidMount() {
+            var dispatch = this.props.dispatch;
+
+            dispatch((0, _changes.fetchChangesIfNeeded)());
+        }
+    }, {
+        key: 'componentWillReceiveProps',
+        value: function componentWillReceiveProps(nextProps) {
+            if (!nextProps.loaded && this.props.loaded && !nextProps.isLoading) nextProps.dispatch((0, _changes.fetchChangesIfNeeded)());
+        }
+    }, {
+        key: 'render',
+        value: function render() {
+            var _props = this.props,
+                search = _props.search,
+                changes = _props.changes,
+                skip = _props.skip,
+                status = _props.status;
+
+            var status_values = [{ label: 'All', value: 'ALL' }, { label: 'New', value: 'NEW' }, { label: 'Merged', value: 'MERGED' }, { label: 'Abandoned', value: 'ABANDONED' }];
+            return _react2.default.createElement(
+                'div',
+                { className: 'data-list' },
+                _react2.default.createElement(
+                    'h1',
+                    null,
+                    'Projects'
+                ),
+                _react2.default.createElement(
+                    'table',
+                    { className: 'table' },
+                    _react2.default.createElement(
+                        'thead',
+                        null,
+                        _react2.default.createElement(
+                            'tr',
+                            null,
+                            _react2.default.createElement(
+                                'th',
+                                null,
+                                'Project name'
+                            ),
+                            _react2.default.createElement(
+                                'th',
+                                null,
+                                'Subject'
+                            ),
+                            _react2.default.createElement(
+                                'th',
+                                null,
+                                'Owner'
+                            ),
+                            _react2.default.createElement(
+                                'th',
+                                null,
+                                'Number'
+                            ),
+                            _react2.default.createElement(
+                                'th',
+                                null,
+                                'Status'
+                            ),
+                            _react2.default.createElement(
+                                'th',
+                                null,
+                                'Date'
+                            )
+                        ),
+                        _react2.default.createElement(
+                            'tr',
+                            null,
+                            _react2.default.createElement(
+                                'th',
+                                null,
+                                _react2.default.createElement(_Filter.TextFilter, { value: search, onChange: this.handleFilter })
+                            ),
+                            _react2.default.createElement('th', { colSpan: '3' }),
+                            _react2.default.createElement(
+                                'th',
+                                null,
+                                _react2.default.createElement(_Filter.MultiselectFilter, { value: status, onChange: this.handleStatus, values: status_values })
+                            )
+                        )
+                    ),
+                    _react2.default.createElement(
+                        'tbody',
+                        null,
+                        changes.map(function (change, i) {
+                            return _react2.default.createElement(ChangeRow, { key: i, change: change });
+                        })
+                    ),
+                    _react2.default.createElement(
+                        'tfoot',
+                        null,
+                        _react2.default.createElement(_Paging.Paging, { nb_columns: 6, skip: parseInt(skip), forward: this.handleNext, backward: this.handlePrev })
+                    )
+                )
+            );
+        }
+    }]);
+
+    return Changes;
+}(_react2.default.Component);
+
+Changes.propTypes = {
+    search: _propTypes2.default.string.isRequired,
+    status: _propTypes2.default.array.isRequired,
+    changes: _propTypes2.default.array.isRequired,
+    isLoading: _propTypes2.default.bool.isRequired,
+    dispatch: _propTypes2.default.func.isRequired
+};
+
+
+var mapStateToProps = function mapStateToProps(state) {
+    var changes_reducer = state.changes_reducer;
+
+    return changes_reducer;
+};
+
+exports.default = (0, _reactRouterDom.withRouter)((0, _reactRedux.connect)(mapStateToProps)(Changes));
 
 /***/ })
 /******/ ]);

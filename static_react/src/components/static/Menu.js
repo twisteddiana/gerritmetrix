@@ -16,6 +16,9 @@ export class Menu extends React.Component {
                     <li>
                          <NavLink activeClassName="active" to="/projects">Projects</NavLink>
                     </li>
+                    <li>
+                         <NavLink activeClassName="active" to="/changes">Changes</NavLink>
+                    </li>
                 </ul>
             </div>
         )
