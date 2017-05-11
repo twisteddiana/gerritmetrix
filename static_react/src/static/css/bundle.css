@@ -387,7 +387,11 @@ body {
 }
 html .app-content,
 body .app-content {
-  margin-top: 20px;
+  margin-top: 2rem;
+}
+html .app-content h1,
+body .app-content h1 {
+  margin-bottom: 2rem;
 }
 html .table th,
 body .table th,
@@ -402,6 +406,12 @@ body .table th {
 html .table td,
 body .table td {
   border-bottom: 1px solid #fff;
+}
+html .box,
+body .box {
+  background: #fff;
+  padding: 1rem;
+  margin-bottom: 2rem;
 }
 header {
   background-color: #3b3f51;

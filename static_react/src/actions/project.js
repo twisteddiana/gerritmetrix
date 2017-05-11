@@ -4,18 +4,18 @@
 import axios from 'axios'
 
 export const SELECT_PROJECT = 'SELECT_PROJECT'
-export const REQUEST_CHANGES = 'REQUEST_CHANGES'
-export const RECEIVE_CHANGES = 'RECEIVE_CHANGES'
+export const REQUEST_PROJECT_CHANGES = 'REQUEST_PROJECT_CHANGES'
+export const RECEIVE_PROJECT_CHANGES = 'RECEIVE_PROJECT_CHANGES'
 export const NEXT_PAGE = 'NEXT_PAGE'
 export const PREV_PAGE = 'PREV_PAGE'
 export const QUERTY_STRING = 'QUERY_STRING'
 
 export const requestChanges = () => ({
-    type: REQUEST_CHANGES
+    type: REQUEST_PROJECT_CHANGES
 })
 
 export const receiveChanges = changes => ({
-    type: RECEIVE_CHANGES,
+    type: RECEIVE_PROJECT_CHANGES,
     changes: changes
 })
 

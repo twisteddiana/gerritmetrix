@@ -14390,7 +14390,7 @@ var applyQueryString = exports.applyQueryString = function applyQueryString(quer
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-exports.applyQueryString = exports.selectProject = exports.prevPage = exports.nextPage = exports.fetchChangesIfNeeded = exports.receiveChanges = exports.requestChanges = exports.QUERTY_STRING = exports.PREV_PAGE = exports.NEXT_PAGE = exports.RECEIVE_CHANGES = exports.REQUEST_CHANGES = exports.SELECT_PROJECT = undefined;
+exports.applyQueryString = exports.selectProject = exports.prevPage = exports.nextPage = exports.fetchChangesIfNeeded = exports.receiveChanges = exports.requestChanges = exports.QUERTY_STRING = exports.PREV_PAGE = exports.NEXT_PAGE = exports.RECEIVE_PROJECT_CHANGES = exports.REQUEST_PROJECT_CHANGES = exports.SELECT_PROJECT = undefined;
 
 var _axios = __webpack_require__(45);
 
@@ -14401,21 +14401,21 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 var SELECT_PROJECT = exports.SELECT_PROJECT = 'SELECT_PROJECT'; /**
                                                                  * Created by diana on 09.05.2017.
                                                                  */
-var REQUEST_CHANGES = exports.REQUEST_CHANGES = 'REQUEST_CHANGES';
-var RECEIVE_CHANGES = exports.RECEIVE_CHANGES = 'RECEIVE_CHANGES';
+var REQUEST_PROJECT_CHANGES = exports.REQUEST_PROJECT_CHANGES = 'REQUEST_PROJECT_CHANGES';
+var RECEIVE_PROJECT_CHANGES = exports.RECEIVE_PROJECT_CHANGES = 'RECEIVE_PROJECT_CHANGES';
 var NEXT_PAGE = exports.NEXT_PAGE = 'NEXT_PAGE';
 var PREV_PAGE = exports.PREV_PAGE = 'PREV_PAGE';
 var QUERTY_STRING = exports.QUERTY_STRING = 'QUERY_STRING';
 
 var requestChanges = exports.requestChanges = function requestChanges() {
     return {
-        type: REQUEST_CHANGES
+        type: REQUEST_PROJECT_CHANGES
     };
 };
 
 var receiveChanges = exports.receiveChanges = function receiveChanges(changes) {
     return {
-        type: RECEIVE_CHANGES,
+        type: RECEIVE_PROJECT_CHANGES,
         changes: changes
     };
 };
@@ -31585,7 +31585,11 @@ var ChangeRow = function (_React$Component) {
                 _react2.default.createElement(
                     'td',
                     null,
-                    subject
+                    _react2.default.createElement(
+                        _reactRouterDom.Link,
+                        { to: "/changes/" + change.number },
+                        subject
+                    )
                 ),
                 _react2.default.createElement(
                     'td',
@@ -32668,6 +32672,10 @@ var _Changes = __webpack_require__(268);
 
 var _Changes2 = _interopRequireDefault(_Changes);
 
+var _Change = __webpack_require__(466);
+
+var _Change2 = _interopRequireDefault(_Change);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -32702,6 +32710,7 @@ var App = function (_Component) {
                     _react2.default.createElement(_reactRouterDom.Route, { exact: true, path: '/projects', component: _Projects2.default }),
                     _react2.default.createElement(_reactRouterDom.Route, { exact: true, path: '/projects/:project_1/:project_2', component: _Project2.default }),
                     _react2.default.createElement(_reactRouterDom.Route, { exact: true, path: '/changes', component: _Changes2.default }),
+                    _react2.default.createElement(_reactRouterDom.Route, { exact: true, path: '/changes/:change_number', component: _Change2.default }),
                     _react2.default.createElement(_reactRouterDom.Route, { component: _NotFoundPage2.default })
                 )
             );
@@ -32882,17 +32891,20 @@ var _changes = __webpack_require__(277);
 
 var _changes2 = _interopRequireDefault(_changes);
 
+var _change = __webpack_require__(465);
+
+var _change2 = _interopRequireDefault(_change);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-/**
- * Created by diana on 30.04.2017.
- */
 var gerritmetrixApp = (0, _redux.combineReducers)({
     project_reducer: _projects2.default,
     project_changes_reducer: _project2.default,
-    changes_reducer: _changes2.default
-});
-
+    changes_reducer: _changes2.default,
+    change_reducer: _change2.default
+}); /**
+     * Created by diana on 30.04.2017.
+     */
 exports.default = gerritmetrixApp;
 
 /***/ }),
@@ -32937,12 +32949,12 @@ var project_changes_reducer = function project_changes_reducer() {
                 changes: [],
                 skip: 0
             });
-        case _project.REQUEST_CHANGES:
+        case _project.REQUEST_PROJECT_CHANGES:
             return _extends({}, state, {
                 loaded: false,
                 isLoading: true
             });
-        case _project.RECEIVE_CHANGES:
+        case _project.RECEIVE_PROJECT_CHANGES:
             return _extends({}, state, {
                 loaded: true,
                 changes: action.changes,
@@ -54794,6 +54806,412 @@ exports.default = valueEqual;
 __webpack_require__(249);
 module.exports = __webpack_require__(250);
 
+
+/***/ }),
+/* 458 */,
+/* 459 */,
+/* 460 */,
+/* 461 */,
+/* 462 */,
+/* 463 */,
+/* 464 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.fetchChangeIfNeeded = exports.receiveChange = exports.requestChange = exports.selectChange = exports.RECEIVE_CHANGE_JOB = exports.REQUEST_CHANGE_JOB = exports.RECEIVE_CHANGE = exports.REQUEST_CHANGE = exports.SELECT_CHANGE = undefined;
+
+var _axios = __webpack_require__(45);
+
+var _axios2 = _interopRequireDefault(_axios);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var SELECT_CHANGE = exports.SELECT_CHANGE = 'SELECT_CHANGE'; /**
+                                                              * Created by diana on 11.05.2017.
+                                                              */
+var REQUEST_CHANGE = exports.REQUEST_CHANGE = 'REQUEST_CHANGE';
+var RECEIVE_CHANGE = exports.RECEIVE_CHANGE = 'RECEIVE_CHANGE';
+var REQUEST_CHANGE_JOB = exports.REQUEST_CHANGE_JOB = 'REQUEST_CHANGE_JOB';
+var RECEIVE_CHANGE_JOB = exports.RECEIVE_CHANGE_JOB = 'RECEIVE_CHANGE_JOB';
+
+var selectChange = exports.selectChange = function selectChange(change_number) {
+    return {
+        type: SELECT_CHANGE,
+        change_number: change_number
+    };
+};
+
+var requestChange = exports.requestChange = function requestChange() {
+    return {
+        type: REQUEST_CHANGE
+    };
+};
+
+var receiveChange = exports.receiveChange = function receiveChange(change) {
+    return {
+        type: RECEIVE_CHANGE,
+        change: change
+    };
+};
+
+var fetchChange = function fetchChange(data) {
+    return function (dispatch) {
+        dispatch(requestChange());
+        return _axios2.default.post('/api/change', data).then(function (response) {
+            dispatch(receiveChange(response.data));
+        });
+    };
+};
+
+var shouldFetchChange = function shouldFetchChange(state) {
+    var change = state.change;
+    if (!change) return true;
+    if (state.isLoading) return false;
+    if (state.loaded) return false;
+    return true;
+};
+
+var fetchChangeIfNeeded = exports.fetchChangeIfNeeded = function fetchChangeIfNeeded() {
+    return function (dispatch, getState) {
+        var state = getState().change_reducer;
+        var data = {
+            change_number: state.change_number
+        };
+
+        if (shouldFetchChange(state)) {
+            return dispatch(fetchChange(data));
+        }
+    };
+};
+
+/***/ }),
+/* 465 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; /**
+                                                                                                                                                                                                                                                                   * Created by diana on 11.05.2017.
+                                                                                                                                                                                                                                                                   */
+
+var _change = __webpack_require__(464);
+
+var initialState = {
+    change_number: "",
+    loaded: false,
+    isLoading: false,
+    change: false
+};
+
+var change_reducer = function change_reducer() {
+    var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : initialState;
+    var action = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+    var skip = state.skip,
+        limit = state.limit;
+
+    switch (action.type) {
+        case _change.SELECT_CHANGE:
+            return _extends({}, state, {
+                change_number: action.change_number,
+                loaded: false,
+                isLoading: false
+            });
+        case _change.REQUEST_CHANGE:
+            return _extends({}, state, {
+                loaded: false,
+                isLoading: true
+            });
+        case _change.RECEIVE_CHANGE:
+            return _extends({}, state, {
+                loaded: true,
+                change: action.change,
+                isLoading: false
+            });
+        default:
+            return state;
+    }
+};
+
+exports.default = change_reducer;
+
+/***/ }),
+/* 466 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.Change = undefined;
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _react = __webpack_require__(4);
+
+var _react2 = _interopRequireDefault(_react);
+
+var _reactRouterDom = __webpack_require__(16);
+
+var _propTypes = __webpack_require__(7);
+
+var _propTypes2 = _interopRequireDefault(_propTypes);
+
+var _reactRedux = __webpack_require__(27);
+
+var _change = __webpack_require__(464);
+
+var _reactMoment = __webpack_require__(68);
+
+var _reactMoment2 = _interopRequireDefault(_reactMoment);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; } /**
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                * Created by diana on 11.05.2017.
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                */
+
+
+var ChangeHeaderLeft = function (_React$Component) {
+    _inherits(ChangeHeaderLeft, _React$Component);
+
+    function ChangeHeaderLeft() {
+        _classCallCheck(this, ChangeHeaderLeft);
+
+        return _possibleConstructorReturn(this, (ChangeHeaderLeft.__proto__ || Object.getPrototypeOf(ChangeHeaderLeft)).apply(this, arguments));
+    }
+
+    _createClass(ChangeHeaderLeft, [{
+        key: 'render',
+        value: function render() {
+            var change = this.props.change;
+
+
+            return _react2.default.createElement(
+                'div',
+                { className: 'box' },
+                _react2.default.createElement(
+                    'div',
+                    { className: 'row' },
+                    _react2.default.createElement(
+                        'div',
+                        { className: 'col' },
+                        'Status'
+                    ),
+                    _react2.default.createElement(
+                        'div',
+                        { className: 'col-8' },
+                        _react2.default.createElement(
+                            'strong',
+                            null,
+                            change.change.status
+                        )
+                    )
+                ),
+                _react2.default.createElement(
+                    'div',
+                    { className: 'row' },
+                    _react2.default.createElement(
+                        'div',
+                        { className: 'col' },
+                        'Uploaded at'
+                    ),
+                    _react2.default.createElement(
+                        'div',
+                        { className: 'col-8' },
+                        _react2.default.createElement(
+                            'strong',
+                            null,
+                            _react2.default.createElement(
+                                _reactMoment2.default,
+                                { format: 'do MMM Y HH:mm:ss' },
+                                change.eventCreatedOn * 1000
+                            )
+                        )
+                    )
+                ),
+                _react2.default.createElement(
+                    'div',
+                    { className: 'row' },
+                    _react2.default.createElement(
+                        'div',
+                        { className: 'col' },
+                        'Last updated'
+                    ),
+                    _react2.default.createElement(
+                        'div',
+                        { className: 'col-8' },
+                        _react2.default.createElement(
+                            'strong',
+                            null,
+                            _react2.default.createElement(
+                                _reactMoment2.default,
+                                { format: 'do MMM Y HH:mm:ss' },
+                                change.lastUpdate * 1000
+                            )
+                        )
+                    )
+                ),
+                _react2.default.createElement(
+                    'div',
+                    { className: 'row' },
+                    _react2.default.createElement(
+                        'div',
+                        { className: 'col' },
+                        'Uploader'
+                    ),
+                    _react2.default.createElement(
+                        'div',
+                        { className: 'col-8' },
+                        _react2.default.createElement(
+                            'strong',
+                            null,
+                            change.uploader.name,
+                            ' (',
+                            change.uploader.email,
+                            ')'
+                        )
+                    )
+                )
+            );
+        }
+    }]);
+
+    return ChangeHeaderLeft;
+}(_react2.default.Component);
+
+ChangeHeaderLeft.propTypes = {
+    change: _propTypes2.default.object.isRequired
+};
+
+var ChangeHeaderRight = function (_React$Component2) {
+    _inherits(ChangeHeaderRight, _React$Component2);
+
+    function ChangeHeaderRight() {
+        _classCallCheck(this, ChangeHeaderRight);
+
+        return _possibleConstructorReturn(this, (ChangeHeaderRight.__proto__ || Object.getPrototypeOf(ChangeHeaderRight)).apply(this, arguments));
+    }
+
+    _createClass(ChangeHeaderRight, [{
+        key: 'render',
+        value: function render() {
+            var commitMessage = this.props.commitMessage;
+
+
+            return _react2.default.createElement(
+                'div',
+                { className: 'box' },
+                commitMessage.split("\n").map(function (item, i) {
+                    return _react2.default.createElement(
+                        'p',
+                        { key: i },
+                        item
+                    );
+                })
+            );
+        }
+    }]);
+
+    return ChangeHeaderRight;
+}(_react2.default.Component);
+
+ChangeHeaderRight.propTypes = {
+    commitMessage: _propTypes2.default.string.isRequired
+};
+
+var Change = exports.Change = function (_React$Component3) {
+    _inherits(Change, _React$Component3);
+
+    function Change() {
+        _classCallCheck(this, Change);
+
+        return _possibleConstructorReturn(this, (Change.__proto__ || Object.getPrototypeOf(Change)).apply(this, arguments));
+    }
+
+    _createClass(Change, [{
+        key: 'componentWillMount',
+        value: function componentWillMount() {
+            var change_number = this.props.match.params.change_number;
+            var dispatch = this.props.dispatch;
+
+            dispatch((0, _change.selectChange)(change_number));
+        }
+    }, {
+        key: 'componentDidMount',
+        value: function componentDidMount() {
+            var dispatch = this.props.dispatch;
+
+            dispatch((0, _change.fetchChangeIfNeeded)());
+        }
+    }, {
+        key: 'render',
+        value: function render() {
+            var change = this.props.change;
+
+            if (!change) return null;
+
+            return _react2.default.createElement(
+                'div',
+                { className: 'change' },
+                _react2.default.createElement(
+                    'h1',
+                    null,
+                    change.change.project,
+                    ' ',
+                    change.change.number
+                ),
+                _react2.default.createElement(
+                    'div',
+                    { className: 'row' },
+                    _react2.default.createElement(
+                        'div',
+                        { className: 'col-3' },
+                        _react2.default.createElement(ChangeHeaderLeft, { change: change })
+                    ),
+                    _react2.default.createElement(
+                        'div',
+                        { className: 'col-6' },
+                        _react2.default.createElement(ChangeHeaderRight, { commitMessage: change.change.commitMessage })
+                    )
+                ),
+                _react2.default.createElement('div', { className: 'box' })
+            );
+        }
+    }]);
+
+    return Change;
+}(_react2.default.Component);
+
+Change.propTypes = {
+    change_number: _propTypes2.default.string.isRequired,
+    isLoading: _propTypes2.default.bool.isRequired,
+    dispatch: _propTypes2.default.func.isRequired
+};
+
+
+var mapStateToProps = function mapStateToProps(state) {
+    var change_reducer = state.change_reducer;
+
+    return change_reducer;
+};
+
+exports.default = (0, _reactRouterDom.withRouter)((0, _reactRedux.connect)(mapStateToProps)(Change));
 
 /***/ })
 /******/ ]);

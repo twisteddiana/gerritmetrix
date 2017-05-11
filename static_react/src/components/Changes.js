@@ -32,7 +32,11 @@ class ChangeRow extends React.Component {
                         {change.project}
                     </Link>
                 </td>
-                <td>{subject}</td>
+                <td>
+                    <Link to={"/changes/"+change.number}>
+                        {subject}
+                    </Link>
+                </td>
                 <td>{change.owner.name}</td>
                 <td>
                     <Link to={"/changes/"+ change.number}>

@@ -3,7 +3,7 @@
  */
 
 import {
-    REQUEST_CHANGES, RECEIVE_CHANGES,
+    REQUEST_PROJECT_CHANGES, RECEIVE_PROJECT_CHANGES,
     NEXT_PAGE, PREV_PAGE, QUERTY_STRING, SELECT_PROJECT
 } from '../actions/project'
 
@@ -29,13 +29,13 @@ const project_changes_reducer = (state = initialState, action = {}) => {
                 changes: [],
                 skip: 0
             }
-        case REQUEST_CHANGES:
+        case REQUEST_PROJECT_CHANGES:
             return {
                 ...state,
                 loaded: false,
                 isLoading: true
             }
-        case RECEIVE_CHANGES:
+        case RECEIVE_PROJECT_CHANGES:
             return {
                 ...state,
                 loaded: true,
