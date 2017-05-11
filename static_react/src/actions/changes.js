@@ -57,7 +57,7 @@ export const fetchChangesIfNeeded = () => (dispatch, getState) => {
 export const filterChanges = (search, status) => ({
     type: FILTER,
     search: search,
-    status: typeof status == 'Array'?status:[status]
+    status: status.constructor == Array?status:[status]
 })
 
 export const nextPage = () => ({

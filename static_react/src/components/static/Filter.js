@@ -86,11 +86,16 @@ selectOption.propTypes = {
 }
 
 export class MultiselectFilter extends React.Component {
+
+    change(e) {
+        window.console.log(e.target.value);
+    }
+
     render() {
         let { value, values, onChange } = this.props
         return (
             <span>
-                <select className="form-control" multiple="multiple" onChange={e => onChange(e.target.value)} value={value}>
+                <select className="form-control" multiple="multiple" onChange={e => this.change(e)} value={value}>
                     {values.map((option, i) =>
                         <option key={i} value={option.value}>{option.label}</option>
                     )}

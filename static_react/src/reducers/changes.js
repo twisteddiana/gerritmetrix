@@ -67,7 +67,10 @@ const changes_reducer = (state = initialState, action = {}) => {
             if (action.params.skip)
                 newstate.skip = parseInt(action.params.skip)
             if (action.params.status)
-                newstate.status = action.params.status
+                if (action.params.status.constructor == Array)
+                    newstate.status = action.params.status
+                else
+                    newstate.status = [action.params.status]
 
             return newstate
         default:

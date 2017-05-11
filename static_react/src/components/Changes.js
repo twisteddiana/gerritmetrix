@@ -10,6 +10,8 @@ import { TextFilter, MultiselectFilter } from './static/Filter'
 import { Paging } from './static/Paging'
 import Moment from 'react-moment'
 import queryString from 'query-string'
+import Select from 'react-select';
+import 'react-select/dist/react-select.css';
 
 class ChangeRow extends React.Component {
     static propTypes = {
@@ -82,16 +84,19 @@ export class Changes extends React.Component {
         })
     }
 
-    handleFilter = (search, status) => {
+    handleFilter = (search) => {
         this.handleHistory("search", search)
         this.handleHistory("skip", 0);
         this.props.dispatch(filterChanges(search, this.props.status))
     }
 
     handleStatus = (status) => {
-        this.handleHistory("status", status)
+        let actual_status = status.map((item, i) => {
+            return item.value
+        })
+        this.handleHistory("status", actual_status)
         this.handleHistory("skip", 0);
-        this.props.dispatch(filterChanges(this.props.search, status))
+        this.props.dispatch(filterChanges(this.props.search, actual_status))
     }
 
     handlePrev = () => {
@@ -140,8 +145,9 @@ export class Changes extends React.Component {
                         </th>
                         <th colSpan="3"></th>
                         <th>
-                            <MultiselectFilter value={status} onChange={this.handleStatus} values={status_values}/>
+                            <Select value={status} multi={true} options={status_values} onChange={this.handleStatus}/>
                         </th>
+                        <th></th>
                     </tr>
                     </thead>
                     <tbody>
