@@ -30,11 +30,30 @@ const change_reducer = (state = initialState, action = {}) => {
                 isLoading: true
             }
         case RECEIVE_CHANGE:
+            let authors = {}
+            let results = {}
+            action.change.comments.forEach((comment) => {
+                authors[comment.author.username] = {
+                    username: comment.author.username,
+                    name: comment.author.name,
+                    jobs: []
+                }
+                results[comment.author.username] = []
+            })
+
+            let changes_list = action.change.patchSets.map((patchSet) => {
+                return [patchSet.change.number, patchSet.patchSet.number]
+            })
+
             return {
                 ...state,
                 loaded: true,
                 change: action.change,
-                isLoading: false
+                isLoading: false,
+                authors: authors,
+                changes_list: changes_list,
+                authors: authors,
+                results: results
             }
         default:
             return state

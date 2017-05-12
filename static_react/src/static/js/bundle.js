@@ -54823,7 +54823,12 @@ module.exports = __webpack_require__(250);
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-exports.fetchChangeIfNeeded = exports.receiveChange = exports.requestChange = exports.selectChange = exports.RECEIVE_CHANGE_JOB = exports.REQUEST_CHANGE_JOB = exports.RECEIVE_CHANGE = exports.REQUEST_CHANGE = exports.SELECT_CHANGE = undefined;
+exports.fetchChangeIfNeeded = exports.receiveChange = exports.requestChange = exports.selectChange = exports.RECEIVE_CHANGE_JOB = exports.REQUEST_CHANGE_JOB = exports.REQUEST_JOB_DATA = exports.RECEIVE_CHANGE = exports.REQUEST_CHANGE = exports.SELECT_CHANGE = undefined;
+
+var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }(); /**
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          * Created by diana on 11.05.2017.
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          */
+
 
 var _axios = __webpack_require__(45);
 
@@ -54831,11 +54836,10 @@ var _axios2 = _interopRequireDefault(_axios);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var SELECT_CHANGE = exports.SELECT_CHANGE = 'SELECT_CHANGE'; /**
-                                                              * Created by diana on 11.05.2017.
-                                                              */
+var SELECT_CHANGE = exports.SELECT_CHANGE = 'SELECT_CHANGE';
 var REQUEST_CHANGE = exports.REQUEST_CHANGE = 'REQUEST_CHANGE';
 var RECEIVE_CHANGE = exports.RECEIVE_CHANGE = 'RECEIVE_CHANGE';
+var REQUEST_JOB_DATA = exports.REQUEST_JOB_DATA = 'REQUEST_JOB_DATA';
 var REQUEST_CHANGE_JOB = exports.REQUEST_CHANGE_JOB = 'REQUEST_CHANGE_JOB';
 var RECEIVE_CHANGE_JOB = exports.RECEIVE_CHANGE_JOB = 'RECEIVE_CHANGE_JOB';
 
@@ -54859,11 +54863,30 @@ var receiveChange = exports.receiveChange = function receiveChange(change) {
     };
 };
 
+var requestJobData = function requestJobData() {
+    return {
+        type: REQUEST_JOB_DATA
+    };
+};
+
 var fetchChange = function fetchChange(data) {
     return function (dispatch) {
         dispatch(requestChange());
         return _axios2.default.post('/api/change', data).then(function (response) {
             dispatch(receiveChange(response.data));
+            dispatch(processChange());
+        });
+    };
+};
+
+var processChange = function processChange() {
+    return function (dispatch, getState) {
+        var state = getState().change_reducer;
+        dispatch(requestJobData());
+        Object.entries(state.authors).forEach(function (_ref) {
+            var _ref2 = _slicedToArray(_ref, 2),
+                username = _ref2[0],
+                author = _ref2[1];
         });
     };
 };
@@ -54906,6 +54929,8 @@ var _extends = Object.assign || function (target) { for (var i = 1; i < argument
 
 var _change = __webpack_require__(464);
 
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
 var initialState = {
     change_number: "",
     loaded: false,
@@ -54914,6 +54939,8 @@ var initialState = {
 };
 
 var change_reducer = function change_reducer() {
+    var _extends2;
+
     var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : initialState;
     var action = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
     var skip = state.skip,
@@ -54932,11 +54959,28 @@ var change_reducer = function change_reducer() {
                 isLoading: true
             });
         case _change.RECEIVE_CHANGE:
-            return _extends({}, state, {
+            var authors = {};
+            var results = {};
+            action.change.comments.forEach(function (comment) {
+                authors[comment.author.username] = {
+                    username: comment.author.username,
+                    name: comment.author.name,
+                    jobs: []
+                };
+                results[comment.author.username] = [];
+            });
+
+            var changes_list = action.change.patchSets.map(function (patchSet) {
+                return [patchSet.change.number, patchSet.patchSet.number];
+            });
+
+            return _extends({}, state, (_extends2 = {
                 loaded: true,
                 change: action.change,
-                isLoading: false
-            });
+                isLoading: false,
+                authors: authors,
+                changes_list: changes_list
+            }, _defineProperty(_extends2, "authors", authors), _defineProperty(_extends2, "results", results), _extends2));
         default:
             return state;
     }
