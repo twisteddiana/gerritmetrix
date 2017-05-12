@@ -28,6 +28,20 @@ const requestJobData = () => ({
     type: REQUEST_JOB_DATA
 })
 
+const receiveChangeJob = (request, result) => ({
+    type: RECEIVE_CHANGE_JOB,
+    request: request,
+    result: result
+})
+
+const fetchChangeJob = data => dispatch => {
+    dispatch({type: REQUEST_CHANGE_JOB})
+    return axios.post('/api/change_chart', data)
+        .then(response => {
+            dispatch(receiveChangeJob(data, response.data))
+        })
+}
+
 const fetchChange = data => dispatch => {
     dispatch(requestChange())
     return axios.post('/api/change', data)
@@ -39,9 +53,16 @@ const fetchChange = data => dispatch => {
 
 const processChange = () => (dispatch, getState) => {
     const state = getState().change_reducer
+    window.console.log(state);
     dispatch(requestJobData())
     Object.entries(state.authors).forEach(([username, author]) => {
+        const data = {
+            author: username,
+            change: state.change_number,
+            project: state.change.change.project
+        }
 
+        dispatch(fetchChangeJob(data))
     })
 }
 

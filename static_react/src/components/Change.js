@@ -73,6 +73,56 @@ class ChangeHeaderRight extends React.Component {
     }
 }
 
+class ChangeTable extends React.Component {
+    static propTypes = {
+        changes_list: PropTypes.array.isRequired,
+        authors: PropTypes.object.isRequired,
+        results: PropTypes.object.isRequired
+    }
+
+    render() {
+        let {authors, changes_list, results} = this.props
+        return(
+            <div className="table-holder">
+                <div className="flex-holder">
+                    <ChangeTableSidebar authors={authors}/>
+                </div>
+            </div>
+        )
+    }
+}
+
+class ChangeTableSidebar extends React.Component {
+    static propTypes = {
+        authors: PropTypes.object.isRequired
+    }
+
+    render() {
+        let {authors} = this.props;
+        let ordered_authors = [];
+
+        Object.entries(authors).forEach(([username, author]) => {
+            if (username == 'jenkins')
+                ordered_authors.unshift(author)
+            else
+                ordered_authors.push(author)
+        })
+        return (
+            <div className="flex-sidebar">
+                <div className="empty-top"></div>
+                {ordered_authors.map((author, key) =>
+                    <div className="author">
+                        <div className="item">{author.name}</div>
+                        {author.jobs.map((job, key) =>
+                            <div className="item">{job.job}</div>
+                        )}
+                    </div>
+                )}
+            </div>
+        )
+    }
+}
+
 export class Change extends React.Component {
     static propTypes = {
         change_number: PropTypes.string.isRequired,
@@ -92,7 +142,7 @@ export class Change extends React.Component {
     }
 
     render() {
-        let { change } = this.props
+        let { change, authors, changes_list, results_per_patchset } = this.props
         if (!change)
             return null
 
@@ -107,7 +157,9 @@ export class Change extends React.Component {
                         <ChangeHeaderRight commitMessage={change.change.commitMessage}/>
                     </div>
                 </div>
-                <div className="box"></div>
+                <div className="box">
+                    <ChangeTable authors={authors} changes_list={changes_list} results={results_per_patchset}/>
+                </div>
             </div>
         )
     }

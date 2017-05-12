@@ -54869,6 +54869,23 @@ var requestJobData = function requestJobData() {
     };
 };
 
+var receiveChangeJob = function receiveChangeJob(request, result) {
+    return {
+        type: RECEIVE_CHANGE_JOB,
+        request: request,
+        result: result
+    };
+};
+
+var fetchChangeJob = function fetchChangeJob(data) {
+    return function (dispatch) {
+        dispatch({ type: REQUEST_CHANGE_JOB });
+        return _axios2.default.post('/api/change_chart', data).then(function (response) {
+            dispatch(receiveChangeJob(data, response.data));
+        });
+    };
+};
+
 var fetchChange = function fetchChange(data) {
     return function (dispatch) {
         dispatch(requestChange());
@@ -54882,11 +54899,20 @@ var fetchChange = function fetchChange(data) {
 var processChange = function processChange() {
     return function (dispatch, getState) {
         var state = getState().change_reducer;
+        window.console.log(state);
         dispatch(requestJobData());
         Object.entries(state.authors).forEach(function (_ref) {
             var _ref2 = _slicedToArray(_ref, 2),
                 username = _ref2[0],
                 author = _ref2[1];
+
+            var data = {
+                author: username,
+                change: state.change_number,
+                project: state.change.change.project
+            };
+
+            dispatch(fetchChangeJob(data));
         });
     };
 };
@@ -54939,8 +54965,6 @@ var initialState = {
 };
 
 var change_reducer = function change_reducer() {
-    var _extends2;
-
     var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : initialState;
     var action = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
     var skip = state.skip,
@@ -54948,39 +54972,74 @@ var change_reducer = function change_reducer() {
 
     switch (action.type) {
         case _change.SELECT_CHANGE:
-            return _extends({}, state, {
-                change_number: action.change_number,
-                loaded: false,
-                isLoading: false
-            });
+            {
+                return _extends({}, state, {
+                    change_number: action.change_number,
+                    loaded: false,
+                    isLoading: false
+                });
+            }
         case _change.REQUEST_CHANGE:
-            return _extends({}, state, {
-                loaded: false,
-                isLoading: true
-            });
+            {
+                return _extends({}, state, {
+                    loaded: false,
+                    isLoading: true
+                });
+            }
         case _change.RECEIVE_CHANGE:
-            var authors = {};
-            var results = {};
-            action.change.comments.forEach(function (comment) {
-                authors[comment.author.username] = {
-                    username: comment.author.username,
-                    name: comment.author.name,
-                    jobs: []
-                };
-                results[comment.author.username] = [];
-            });
+            {
+                var _extends2;
 
-            var changes_list = action.change.patchSets.map(function (patchSet) {
-                return [patchSet.change.number, patchSet.patchSet.number];
-            });
+                var authors = {};
+                var results = {};
+                action.change.comments.forEach(function (comment) {
+                    authors[comment.author.username] = {
+                        username: comment.author.username,
+                        name: comment.author.name,
+                        jobs: []
+                    };
+                    results[comment.author.username] = [];
+                });
 
-            return _extends({}, state, (_extends2 = {
-                loaded: true,
-                change: action.change,
-                isLoading: false,
-                authors: authors,
-                changes_list: changes_list
-            }, _defineProperty(_extends2, "authors", authors), _defineProperty(_extends2, "results", results), _extends2));
+                var changes_list = action.change.patchSets.map(function (patchSet) {
+                    return [patchSet.change.number, patchSet.patchSet.number];
+                });
+
+                return _extends({}, state, (_extends2 = {
+                    loaded: true,
+                    change: action.change,
+                    isLoading: false,
+                    authors: authors,
+                    changes_list: changes_list
+                }, _defineProperty(_extends2, 'authors', authors), _defineProperty(_extends2, 'results', results), _defineProperty(_extends2, 'results_per_patchset', {}), _extends2));
+            }
+        case _change.RECEIVE_CHANGE_JOB:
+            {
+                var _authors = state.authors,
+                    _results = state.results,
+                    results_per_patchset = state.results_per_patchset;
+
+                _authors[action.request.author].jobs = action.result.jobs.map(function (job) {
+                    return {
+                        job: job
+                    };
+                });
+                _results[action.request.author] = action.result.result;
+                _results[action.request.author].map(function (result) {
+                    var change_val = result.number + '_' + result.patchSet;
+                    if (results_per_patchset[change_val] == undefined) results_per_patchset[change_val] = {};
+                    if (results_per_patchset[change_val][action.request.author] == undefined) results_per_patchset[change_val][action.request.author] = {};
+                    if (results_per_patchset[change_val][action.request.author][result.job] == undefined) results_per_patchset[change_val][action.request.author][result.job] = [];
+
+                    results_per_patchset[change_val][action.request.author][result.job].push(result);
+                });
+
+                return _extends({}, state, {
+                    authors: _authors,
+                    results: _results,
+                    results_per_patchset: results_per_patchset
+                });
+            }
         default:
             return state;
     }
@@ -54999,6 +55058,8 @@ Object.defineProperty(exports, "__esModule", {
     value: true
 });
 exports.Change = undefined;
+
+var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
@@ -55179,8 +55240,102 @@ ChangeHeaderRight.propTypes = {
     commitMessage: _propTypes2.default.string.isRequired
 };
 
-var Change = exports.Change = function (_React$Component3) {
-    _inherits(Change, _React$Component3);
+var ChangeTable = function (_React$Component3) {
+    _inherits(ChangeTable, _React$Component3);
+
+    function ChangeTable() {
+        _classCallCheck(this, ChangeTable);
+
+        return _possibleConstructorReturn(this, (ChangeTable.__proto__ || Object.getPrototypeOf(ChangeTable)).apply(this, arguments));
+    }
+
+    _createClass(ChangeTable, [{
+        key: 'render',
+        value: function render() {
+            var _props = this.props,
+                authors = _props.authors,
+                changes_list = _props.changes_list,
+                results = _props.results;
+
+            return _react2.default.createElement(
+                'div',
+                { className: 'table-holder' },
+                _react2.default.createElement(
+                    'div',
+                    { className: 'flex-holder' },
+                    _react2.default.createElement(ChangeTableSidebar, { authors: authors })
+                )
+            );
+        }
+    }]);
+
+    return ChangeTable;
+}(_react2.default.Component);
+
+ChangeTable.propTypes = {
+    changes_list: _propTypes2.default.array.isRequired,
+    authors: _propTypes2.default.object.isRequired,
+    results: _propTypes2.default.object.isRequired
+};
+
+var ChangeTableSidebar = function (_React$Component4) {
+    _inherits(ChangeTableSidebar, _React$Component4);
+
+    function ChangeTableSidebar() {
+        _classCallCheck(this, ChangeTableSidebar);
+
+        return _possibleConstructorReturn(this, (ChangeTableSidebar.__proto__ || Object.getPrototypeOf(ChangeTableSidebar)).apply(this, arguments));
+    }
+
+    _createClass(ChangeTableSidebar, [{
+        key: 'render',
+        value: function render() {
+            var authors = this.props.authors;
+
+            var ordered_authors = [];
+
+            Object.entries(authors).forEach(function (_ref) {
+                var _ref2 = _slicedToArray(_ref, 2),
+                    username = _ref2[0],
+                    author = _ref2[1];
+
+                if (username == 'jenkins') ordered_authors.unshift(author);else ordered_authors.push(author);
+            });
+            return _react2.default.createElement(
+                'div',
+                { className: 'flex-sidebar' },
+                _react2.default.createElement('div', { className: 'empty-top' }),
+                ordered_authors.map(function (author, key) {
+                    return _react2.default.createElement(
+                        'div',
+                        { className: 'author' },
+                        _react2.default.createElement(
+                            'div',
+                            { className: 'item' },
+                            author.name
+                        ),
+                        author.jobs.map(function (job, key) {
+                            return _react2.default.createElement(
+                                'div',
+                                { className: 'item' },
+                                job.job
+                            );
+                        })
+                    );
+                })
+            );
+        }
+    }]);
+
+    return ChangeTableSidebar;
+}(_react2.default.Component);
+
+ChangeTableSidebar.propTypes = {
+    authors: _propTypes2.default.object.isRequired
+};
+
+var Change = exports.Change = function (_React$Component5) {
+    _inherits(Change, _React$Component5);
 
     function Change() {
         _classCallCheck(this, Change);
@@ -55206,7 +55361,11 @@ var Change = exports.Change = function (_React$Component3) {
     }, {
         key: 'render',
         value: function render() {
-            var change = this.props.change;
+            var _props2 = this.props,
+                change = _props2.change,
+                authors = _props2.authors,
+                changes_list = _props2.changes_list,
+                results_per_patchset = _props2.results_per_patchset;
 
             if (!change) return null;
 
@@ -55234,7 +55393,11 @@ var Change = exports.Change = function (_React$Component3) {
                         _react2.default.createElement(ChangeHeaderRight, { commitMessage: change.change.commitMessage })
                     )
                 ),
-                _react2.default.createElement('div', { className: 'box' })
+                _react2.default.createElement(
+                    'div',
+                    { className: 'box' },
+                    _react2.default.createElement(ChangeTable, { authors: authors, changes_list: changes_list, results: results_per_patchset })
+                )
             );
         }
     }]);
