@@ -76,16 +76,20 @@ class ChangeHeaderRight extends React.Component {
 class ChangeTable extends React.Component {
     static propTypes = {
         changes_list: PropTypes.array.isRequired,
-        authors: PropTypes.object.isRequired,
+        authors: PropTypes.array.isRequired,
         results: PropTypes.object.isRequired
     }
 
     render() {
         let {authors, changes_list, results} = this.props
+
         return(
             <div className="table-holder">
                 <div className="flex-holder">
                     <ChangeTableSidebar authors={authors}/>
+                    {changes_list.map((change_arr, key) =>
+                        <PatchSetResult key={key} change_number={change_arr[0]} patchSet={change_arr[1]} authors={authors} results={results[change_arr[0]+'_'+change_arr[1]]} />
+                    )}
                 </div>
             </div>
         )
@@ -94,31 +98,139 @@ class ChangeTable extends React.Component {
 
 class ChangeTableSidebar extends React.Component {
     static propTypes = {
-        authors: PropTypes.object.isRequired
+        authors: PropTypes.array.isRequired
     }
 
     render() {
         let {authors} = this.props;
-        let ordered_authors = [];
-
-        Object.entries(authors).forEach(([username, author]) => {
-            if (username == 'jenkins')
-                ordered_authors.unshift(author)
-            else
-                ordered_authors.push(author)
-        })
         return (
             <div className="flex-sidebar">
-                <div className="empty-top"></div>
-                {ordered_authors.map((author, key) =>
-                    <div className="author">
+                <div className="flex-top"></div>
+                {authors.map((author, key) =>
+                    <div className="author" key={key}>
                         <div className="item">{author.name}</div>
                         {author.jobs.map((job, key) =>
-                            <div className="item">{job.job}</div>
+                            <div className="item" key={key}>
+                                <span>
+                                    {job.job}
+                                </span>
+                            </div>
                         )}
                     </div>
                 )}
             </div>
+        )
+    }
+}
+
+class PatchSetResult extends React.Component {
+    static propTypes = {
+        change_number: PropTypes.string.isRequired,
+        patchSet: PropTypes.string.isRequired,
+        authors: PropTypes.array.isRequired,
+        results: PropTypes.object
+    }
+
+    render() {
+        let { change_number, patchSet, authors, results } = this.props;
+        if (!results)
+            return null
+
+        return (
+            <div className="flex-item">
+                <div className="flex-top">
+                    {change_number}
+                    <br/>
+                    {patchSet}
+                </div>
+                {authors.map((author, key) =>
+                    <div className="author" key={key}>
+                        <AuthorResult results={results[author.username]}/>
+                        {author.jobs.map((job, key) =>
+                            <JobResult results={results[author.username]} job={job.job} key={key}/>
+                        )}
+                    </div>
+                )}
+            </div>
+        )
+    }
+}
+
+class JobResult extends React.Component {
+    static propTypes = {
+        results: PropTypes.object.isRequired,
+        job: PropTypes.string.isRequired
+    }
+
+    static defaultProps = {
+        results: {}
+    }
+
+    render() {
+        let { results, job } = this.props
+        if (typeof results[job] == 'undefined')
+            return (
+                <div className="ci-result"></div>
+            )
+
+         return (
+            <div className="ci-result">
+                {results[job].map((result, key) =>
+                    <CiTestResult result={result} key={key}/>
+                )}
+            </div>
+        )
+    }
+}
+
+class AuthorResult extends React.Component {
+    static propTypes = {
+        results: PropTypes.object.isRequired
+    }
+
+    static defaultProps = {
+        results: {}
+    }
+
+    render() {
+        let { results } = this.props
+        let max = 0
+        let result_set = []
+
+        Object.entries(results).forEach(([job, result_list]) => {
+            if (result_list.length > max) {
+                max = result_list.length;
+                result_set = result_list;
+            }
+        })
+
+        return (
+            <div className="ci-result">
+                {result_set.map((result, key) =>
+                    <CiTestResult result={result} key={key}/>
+                )}
+            </div>
+        )
+    }
+}
+
+class CiTestResult extends React.Component {
+    static propTypes = {
+        result: PropTypes.object.isRequired
+    }
+
+    render() {
+        let { build_result } = this.props.result
+        let className = 'general';
+        if (typeof build_result == 'undefined')
+            className = 'fail';
+        else if (build_result.indexOf('fail') > -1)
+            className = 'fail';
+        else if (build_result.indexOf('succ') > -1)
+            className = 'success';
+
+        return (
+            <div className={className}></div>
         )
     }
 }
@@ -142,7 +254,7 @@ export class Change extends React.Component {
     }
 
     render() {
-        let { change, authors, changes_list, results_per_patchset } = this.props
+        let { change, changes_list, results_per_patchset, ordered_authors } = this.props
         if (!change)
             return null
 
@@ -158,7 +270,7 @@ export class Change extends React.Component {
                     </div>
                 </div>
                 <div className="box">
-                    <ChangeTable authors={authors} changes_list={changes_list} results={results_per_patchset}/>
+                    <ChangeTable authors={ordered_authors} changes_list={changes_list} results={results_per_patchset}/>
                 </div>
             </div>
         )

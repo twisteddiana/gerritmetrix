@@ -53,7 +53,6 @@ const fetchChange = data => dispatch => {
 
 const processChange = () => (dispatch, getState) => {
     const state = getState().change_reducer
-    window.console.log(state);
     dispatch(requestJobData())
     Object.entries(state.authors).forEach(([username, author]) => {
         const data = {

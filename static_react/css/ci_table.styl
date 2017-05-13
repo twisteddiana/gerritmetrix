@@ -1,0 +1,50 @@
+.table-holder
+  display block
+  overflow-x auto
+  position relative
+  border 1px solid light-blue
+
+  .flex-holder
+    display flex
+    padding-left 400px
+
+    .flex-sidebar
+      position absolute
+      top 0
+      left 0
+      width 400px
+
+      .item
+        height 25px
+        border-right 1px solid light-blue
+        border-top 1px solid light-blue
+        line-height 25px
+        padding 0 5px
+        overflow hidden
+
+        &:first-child
+          font-weight bold
+
+    .flex-top
+      height 40px
+      text-align center
+      border-right 1px solid light-blue
+
+    .flex-item
+      width 50px
+
+      .ci-result
+        height 25px
+        display flex
+        border-right 1px solid light-blue
+        border-top 1px solid light-blue
+
+        > div
+          flex 1
+
+        .fail
+          background-color fail-red
+        .success
+          background-color success-green
+        .general
+          background abandoned-blue

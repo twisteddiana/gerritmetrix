@@ -54899,7 +54899,6 @@ var fetchChange = function fetchChange(data) {
 var processChange = function processChange() {
     return function (dispatch, getState) {
         var state = getState().change_reducer;
-        window.console.log(state);
         dispatch(requestJobData());
         Object.entries(state.authors).forEach(function (_ref) {
             var _ref2 = _slicedToArray(_ref, 2),
@@ -54948,6 +54947,8 @@ var fetchChangeIfNeeded = exports.fetchChangeIfNeeded = function fetchChangeIfNe
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
+
+var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
 
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; /**
                                                                                                                                                                                                                                                                    * Created by diana on 11.05.2017.
@@ -55001,6 +55002,16 @@ var change_reducer = function change_reducer() {
                     results[comment.author.username] = [];
                 });
 
+                var ordered_authors = [];
+
+                Object.entries(authors).forEach(function (_ref) {
+                    var _ref2 = _slicedToArray(_ref, 2),
+                        username = _ref2[0],
+                        author = _ref2[1];
+
+                    if (username == 'jenkins') ordered_authors.unshift(author);else ordered_authors.push(author);
+                });
+
                 var changes_list = action.change.patchSets.map(function (patchSet) {
                     return [patchSet.change.number, patchSet.patchSet.number];
                 });
@@ -55011,7 +55022,7 @@ var change_reducer = function change_reducer() {
                     isLoading: false,
                     authors: authors,
                     changes_list: changes_list
-                }, _defineProperty(_extends2, 'authors', authors), _defineProperty(_extends2, 'results', results), _defineProperty(_extends2, 'results_per_patchset', {}), _extends2));
+                }, _defineProperty(_extends2, 'authors', authors), _defineProperty(_extends2, 'results', results), _defineProperty(_extends2, 'results_per_patchset', {}), _defineProperty(_extends2, 'ordered_authors', ordered_authors), _extends2));
             }
         case _change.RECEIVE_CHANGE_JOB:
             {
@@ -55027,9 +55038,9 @@ var change_reducer = function change_reducer() {
                 _results[action.request.author] = action.result.result;
                 _results[action.request.author].map(function (result) {
                     var change_val = result.number + '_' + result.patchSet;
-                    if (results_per_patchset[change_val] == undefined) results_per_patchset[change_val] = {};
-                    if (results_per_patchset[change_val][action.request.author] == undefined) results_per_patchset[change_val][action.request.author] = {};
-                    if (results_per_patchset[change_val][action.request.author][result.job] == undefined) results_per_patchset[change_val][action.request.author][result.job] = [];
+                    if (typeof results_per_patchset[change_val] == 'undefined') results_per_patchset[change_val] = {};
+                    if (typeof results_per_patchset[change_val][action.request.author] == 'undefined') results_per_patchset[change_val][action.request.author] = {};
+                    if (typeof results_per_patchset[change_val][action.request.author][result.job] == 'undefined') results_per_patchset[change_val][action.request.author][result.job] = [];
 
                     results_per_patchset[change_val][action.request.author][result.job].push(result);
                 });
@@ -55257,13 +55268,17 @@ var ChangeTable = function (_React$Component3) {
                 changes_list = _props.changes_list,
                 results = _props.results;
 
+
             return _react2.default.createElement(
                 'div',
                 { className: 'table-holder' },
                 _react2.default.createElement(
                     'div',
                     { className: 'flex-holder' },
-                    _react2.default.createElement(ChangeTableSidebar, { authors: authors })
+                    _react2.default.createElement(ChangeTableSidebar, { authors: authors }),
+                    changes_list.map(function (change_arr, key) {
+                        return _react2.default.createElement(PatchSetResult, { key: key, change_number: change_arr[0], patchSet: change_arr[1], authors: authors, results: results[change_arr[0] + '_' + change_arr[1]] });
+                    })
                 )
             );
         }
@@ -55274,7 +55289,7 @@ var ChangeTable = function (_React$Component3) {
 
 ChangeTable.propTypes = {
     changes_list: _propTypes2.default.array.isRequired,
-    authors: _propTypes2.default.object.isRequired,
+    authors: _propTypes2.default.array.isRequired,
     results: _propTypes2.default.object.isRequired
 };
 
@@ -55292,23 +55307,14 @@ var ChangeTableSidebar = function (_React$Component4) {
         value: function render() {
             var authors = this.props.authors;
 
-            var ordered_authors = [];
-
-            Object.entries(authors).forEach(function (_ref) {
-                var _ref2 = _slicedToArray(_ref, 2),
-                    username = _ref2[0],
-                    author = _ref2[1];
-
-                if (username == 'jenkins') ordered_authors.unshift(author);else ordered_authors.push(author);
-            });
             return _react2.default.createElement(
                 'div',
                 { className: 'flex-sidebar' },
-                _react2.default.createElement('div', { className: 'empty-top' }),
-                ordered_authors.map(function (author, key) {
+                _react2.default.createElement('div', { className: 'flex-top' }),
+                authors.map(function (author, key) {
                     return _react2.default.createElement(
                         'div',
-                        { className: 'author' },
+                        { className: 'author', key: key },
                         _react2.default.createElement(
                             'div',
                             { className: 'item' },
@@ -55317,8 +55323,12 @@ var ChangeTableSidebar = function (_React$Component4) {
                         author.jobs.map(function (job, key) {
                             return _react2.default.createElement(
                                 'div',
-                                { className: 'item' },
-                                job.job
+                                { className: 'item', key: key },
+                                _react2.default.createElement(
+                                    'span',
+                                    null,
+                                    job.job
+                                )
                             );
                         })
                     );
@@ -55331,11 +55341,180 @@ var ChangeTableSidebar = function (_React$Component4) {
 }(_react2.default.Component);
 
 ChangeTableSidebar.propTypes = {
-    authors: _propTypes2.default.object.isRequired
+    authors: _propTypes2.default.array.isRequired
 };
 
-var Change = exports.Change = function (_React$Component5) {
-    _inherits(Change, _React$Component5);
+var PatchSetResult = function (_React$Component5) {
+    _inherits(PatchSetResult, _React$Component5);
+
+    function PatchSetResult() {
+        _classCallCheck(this, PatchSetResult);
+
+        return _possibleConstructorReturn(this, (PatchSetResult.__proto__ || Object.getPrototypeOf(PatchSetResult)).apply(this, arguments));
+    }
+
+    _createClass(PatchSetResult, [{
+        key: 'render',
+        value: function render() {
+            var _props2 = this.props,
+                change_number = _props2.change_number,
+                patchSet = _props2.patchSet,
+                authors = _props2.authors,
+                results = _props2.results;
+
+            if (!results) return null;
+
+            return _react2.default.createElement(
+                'div',
+                { className: 'flex-item' },
+                _react2.default.createElement(
+                    'div',
+                    { className: 'flex-top' },
+                    change_number,
+                    _react2.default.createElement('br', null),
+                    patchSet
+                ),
+                authors.map(function (author, key) {
+                    return _react2.default.createElement(
+                        'div',
+                        { className: 'author', key: key },
+                        _react2.default.createElement(AuthorResult, { results: results[author.username] }),
+                        author.jobs.map(function (job, key) {
+                            return _react2.default.createElement(JobResult, { results: results[author.username], job: job.job, key: key });
+                        })
+                    );
+                })
+            );
+        }
+    }]);
+
+    return PatchSetResult;
+}(_react2.default.Component);
+
+PatchSetResult.propTypes = {
+    change_number: _propTypes2.default.string.isRequired,
+    patchSet: _propTypes2.default.string.isRequired,
+    authors: _propTypes2.default.array.isRequired,
+    results: _propTypes2.default.object
+};
+
+var JobResult = function (_React$Component6) {
+    _inherits(JobResult, _React$Component6);
+
+    function JobResult() {
+        _classCallCheck(this, JobResult);
+
+        return _possibleConstructorReturn(this, (JobResult.__proto__ || Object.getPrototypeOf(JobResult)).apply(this, arguments));
+    }
+
+    _createClass(JobResult, [{
+        key: 'render',
+        value: function render() {
+            var _props3 = this.props,
+                results = _props3.results,
+                job = _props3.job;
+
+            if (typeof results[job] == 'undefined') return _react2.default.createElement('div', { className: 'ci-result' });
+
+            return _react2.default.createElement(
+                'div',
+                { className: 'ci-result' },
+                results[job].map(function (result, key) {
+                    return _react2.default.createElement(CiTestResult, { result: result, key: key });
+                })
+            );
+        }
+    }]);
+
+    return JobResult;
+}(_react2.default.Component);
+
+JobResult.propTypes = {
+    results: _propTypes2.default.object.isRequired,
+    job: _propTypes2.default.string.isRequired
+};
+JobResult.defaultProps = {
+    results: {}
+};
+
+var AuthorResult = function (_React$Component7) {
+    _inherits(AuthorResult, _React$Component7);
+
+    function AuthorResult() {
+        _classCallCheck(this, AuthorResult);
+
+        return _possibleConstructorReturn(this, (AuthorResult.__proto__ || Object.getPrototypeOf(AuthorResult)).apply(this, arguments));
+    }
+
+    _createClass(AuthorResult, [{
+        key: 'render',
+        value: function render() {
+            var results = this.props.results;
+
+            var max = 0;
+            var result_set = [];
+
+            Object.entries(results).forEach(function (_ref) {
+                var _ref2 = _slicedToArray(_ref, 2),
+                    job = _ref2[0],
+                    result_list = _ref2[1];
+
+                if (result_list.length > max) {
+                    max = result_list.length;
+                    result_set = result_list;
+                }
+            });
+
+            return _react2.default.createElement(
+                'div',
+                { className: 'ci-result' },
+                result_set.map(function (result, key) {
+                    return _react2.default.createElement(CiTestResult, { result: result, key: key });
+                })
+            );
+        }
+    }]);
+
+    return AuthorResult;
+}(_react2.default.Component);
+
+AuthorResult.propTypes = {
+    results: _propTypes2.default.object.isRequired
+};
+AuthorResult.defaultProps = {
+    results: {}
+};
+
+var CiTestResult = function (_React$Component8) {
+    _inherits(CiTestResult, _React$Component8);
+
+    function CiTestResult() {
+        _classCallCheck(this, CiTestResult);
+
+        return _possibleConstructorReturn(this, (CiTestResult.__proto__ || Object.getPrototypeOf(CiTestResult)).apply(this, arguments));
+    }
+
+    _createClass(CiTestResult, [{
+        key: 'render',
+        value: function render() {
+            var build_result = this.props.result.build_result;
+
+            var className = 'general';
+            if (typeof build_result == 'undefined') className = 'fail';else if (build_result.indexOf('fail') > -1) className = 'fail';else if (build_result.indexOf('succ') > -1) className = 'success';
+
+            return _react2.default.createElement('div', { className: className });
+        }
+    }]);
+
+    return CiTestResult;
+}(_react2.default.Component);
+
+CiTestResult.propTypes = {
+    result: _propTypes2.default.object.isRequired
+};
+
+var Change = exports.Change = function (_React$Component9) {
+    _inherits(Change, _React$Component9);
 
     function Change() {
         _classCallCheck(this, Change);
@@ -55361,11 +55540,11 @@ var Change = exports.Change = function (_React$Component5) {
     }, {
         key: 'render',
         value: function render() {
-            var _props2 = this.props,
-                change = _props2.change,
-                authors = _props2.authors,
-                changes_list = _props2.changes_list,
-                results_per_patchset = _props2.results_per_patchset;
+            var _props4 = this.props,
+                change = _props4.change,
+                changes_list = _props4.changes_list,
+                results_per_patchset = _props4.results_per_patchset,
+                ordered_authors = _props4.ordered_authors;
 
             if (!change) return null;
 
@@ -55396,7 +55575,7 @@ var Change = exports.Change = function (_React$Component5) {
                 _react2.default.createElement(
                     'div',
                     { className: 'box' },
-                    _react2.default.createElement(ChangeTable, { authors: authors, changes_list: changes_list, results: results_per_patchset })
+                    _react2.default.createElement(ChangeTable, { authors: ordered_authors, changes_list: changes_list, results: results_per_patchset })
                 )
             );
         }

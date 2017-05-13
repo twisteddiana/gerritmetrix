@@ -445,3 +445,56 @@ header .top-menu ul li a.active {
   background: #e9ecf3;
   color: #3b3f51;
 }
+.table-holder {
+  display: block;
+  overflow-x: auto;
+  position: relative;
+  border: 1px solid #e9ecf3;
+}
+.table-holder .flex-holder {
+  display: flex;
+  padding-left: 400px;
+}
+.table-holder .flex-holder .flex-sidebar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 400px;
+}
+.table-holder .flex-holder .flex-sidebar .item {
+  height: 25px;
+  border-right: 1px solid #e9ecf3;
+  border-top: 1px solid #e9ecf3;
+  line-height: 25px;
+  padding: 0 5px;
+  overflow: hidden;
+}
+.table-holder .flex-holder .flex-sidebar .item:first-child {
+  font-weight: bold;
+}
+.table-holder .flex-holder .flex-top {
+  height: 40px;
+  text-align: center;
+  border-right: 1px solid #e9ecf3;
+}
+.table-holder .flex-holder .flex-item {
+  width: 50px;
+}
+.table-holder .flex-holder .flex-item .ci-result {
+  height: 25px;
+  display: flex;
+  border-right: 1px solid #e9ecf3;
+  border-top: 1px solid #e9ecf3;
+}
+.table-holder .flex-holder .flex-item .ci-result > div {
+  flex: 1;
+}
+.table-holder .flex-holder .flex-item .ci-result .fail {
+  background-color: #e26a6a;
+}
+.table-holder .flex-holder .flex-item .ci-result .success {
+  background-color: #1bbc9b;
+}
+.table-holder .flex-holder .flex-item .ci-result .general {
+  background: #ccc;
+}

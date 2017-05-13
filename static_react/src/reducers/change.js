@@ -44,6 +44,15 @@ const change_reducer = (state = initialState, action = {}) => {
                 results[comment.author.username] = []
             })
 
+            let ordered_authors = []
+
+            Object.entries(authors).forEach(([username, author]) => {
+                if (username == 'jenkins')
+                    ordered_authors.unshift(author)
+                else
+                    ordered_authors.push(author)
+            })
+
             let changes_list = action.change.patchSets.map((patchSet) => {
                 return [patchSet.change.number, patchSet.patchSet.number]
             })
@@ -57,7 +66,8 @@ const change_reducer = (state = initialState, action = {}) => {
                 changes_list: changes_list,
                 authors: authors,
                 results: results,
-                results_per_patchset: {}
+                results_per_patchset: {},
+                ordered_authors: ordered_authors
             }
         }
         case RECEIVE_CHANGE_JOB: {
@@ -68,11 +78,11 @@ const change_reducer = (state = initialState, action = {}) => {
             results[action.request.author] = action.result.result
             results[action.request.author].map((result) => {
                 let change_val = result.number + '_' + result.patchSet
-                if (results_per_patchset[change_val] == undefined)
+                if (typeof results_per_patchset[change_val] == 'undefined')
                     results_per_patchset[change_val] = {}
-                if (results_per_patchset[change_val][action.request.author] == undefined)
+                if (typeof results_per_patchset[change_val][action.request.author] == 'undefined')
                     results_per_patchset[change_val][action.request.author] = {}
-                if (results_per_patchset[change_val][action.request.author][result.job] == undefined)
+                if (typeof results_per_patchset[change_val][action.request.author][result.job] == 'undefined')
                     results_per_patchset[change_val][action.request.author][result.job] = []
 
                 results_per_patchset[change_val][action.request.author][result.job].push(result)
