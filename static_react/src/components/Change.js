@@ -7,6 +7,8 @@ import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import { fetchChangeIfNeeded, selectChange } from '../actions/change'
 import Moment from 'react-moment'
+import MappleToolTip from 'reactjs-mappletooltip'
+import jsxToString from 'jsx-to-string';
 
 class ChangeHeaderLeft extends React.Component {
     static propTypes = {
@@ -145,7 +147,7 @@ class PatchSetResult extends React.Component {
                 </div>
                 {authors.map((author, key) =>
                     <div className="author" key={key}>
-                        <AuthorResult results={results[author.username]}/>
+                        <AuthorResult results={results[author.username]} author={author.username}/>
                         {author.jobs.map((job, key) =>
                             <JobResult results={results[author.username]} job={job.job} key={key}/>
                         )}
@@ -173,60 +175,72 @@ class JobResult extends React.Component {
                 <div className="ci-result"></div>
             )
 
-         return (
-            <div className="ci-result">
+        return (
+            <div className="ci-result" data-tip={jsxToString(<ResultTooltip results={results[job]}/>)}>
                 {results[job].map((result, key) =>
-                    <CiTestResult result={result} key={key}/>
+                    <CiTestResult result={result.result} key={key}/>
                 )}
+
             </div>
         )
     }
 }
 
+const ResultTooltip = ({results}) => {
+    return(
+        <div>
+            {results.length > 1 &&
+            <p>{results.length - 1} recheck</p>
+            }
+            {results.map((result, key) =>
+                <p key={key}>
+                    Build result {result.build_result} at
+                    <Moment format="do MMM Y HH:mm:ss">{result.checkedOn * 1000}</Moment>
+                </p>
+            )}
+        </div>
+    )
+}
+
 class AuthorResult extends React.Component {
     static propTypes = {
-        results: PropTypes.object.isRequired
+        results: PropTypes.object.isRequired,
+        author: PropTypes.string.isRequired
     }
 
     static defaultProps = {
-        results: {}
+        results: {},
+        author: ''
     }
 
     render() {
-        let { results } = this.props
-        let max = 0
-        let result_set = []
+        let { results, author } = this.props
 
-        Object.entries(results).forEach(([job, result_list]) => {
-            if (result_list.length > max) {
-                max = result_list.length;
-                result_set = result_list;
-            }
-        })
+        if (typeof results[author] == 'undefined')
+            return (
+                <div className="ci-result"></div>
+            )
 
         return (
             <div className="ci-result">
-                {result_set.map((result, key) =>
-                    <CiTestResult result={result} key={key}/>
+                {results[author].map((result, key) =>
+                    <CiTestResult result={result.build_result} key={key}/>
                 )}
+                <ResultTooltip results={results[author]}/>
             </div>
         )
     }
 }
 
 class CiTestResult extends React.Component {
-    static propTypes = {
-        result: PropTypes.object.isRequired
-    }
-
     render() {
-        let { build_result } = this.props.result
+        let result = this.props.result
         let className = 'general';
-        if (typeof build_result == 'undefined')
+        if (typeof result == 'undefined')
             className = 'fail';
-        else if (build_result.indexOf('fail') > -1)
+        else if (result.toLowerCase().indexOf('fail') > -1)
             className = 'fail';
-        else if (build_result.indexOf('succ') > -1)
+        else if (result.toLowerCase().indexOf('succ') > -1)
             className = 'success';
 
         return (

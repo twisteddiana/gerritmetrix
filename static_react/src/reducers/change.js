@@ -88,11 +88,31 @@ const change_reducer = (state = initialState, action = {}) => {
                 results_per_patchset[change_val][action.request.author][result.job].push(result)
             })
 
+            Object.entries(results_per_patchset).forEach(([change_val, result_per_patchset]) => {
+                let author_results = []
+                let author_dates = []
+                if (result_per_patchset[action.request.author] === undefined) {
+                    return
+                }
+
+                Object.entries(result_per_patchset[action.request.author]).forEach(([job, list]) => {
+                    list.forEach((result) => {
+                        if (author_dates.indexOf(result.checkedOn) === -1) {
+                            author_dates.push(result.checkedOn);
+                            author_results.push(result)
+                        }
+                    })
+                })
+
+                results_per_patchset[change_val][action.request.author][action.request.author] = author_results
+            })
+
+
             return {
                 ...state,
                 authors: authors,
                 results: results,
-                results_per_patchset: results_per_patchset
+                results_per_patchset: results_per_patchset,
             }
         }
         default:
