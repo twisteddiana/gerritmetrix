@@ -31828,8 +31828,27 @@ var ChangeTable = function (_React$Component3) {
     }
 
     _createClass(ChangeTable, [{
+        key: 'componentWillMount',
+        value: function componentWillMount() {
+            window.addEventListener('scroll', this.handleScroll.bind(this));
+        }
+    }, {
+        key: 'componentWillUnmount',
+        value: function componentWillUnmount() {
+            window.removeEventListener('scroll', this.handleScroll.bind(this));
+        }
+    }, {
+        key: 'handleScroll',
+        value: function handleScroll() {
+            if (this.holder.getBoundingClientRect().top < 0) {
+                //this.holder.
+            }
+        }
+    }, {
         key: 'render',
         value: function render() {
+            var _this4 = this;
+
             var _props = this.props,
                 authors = _props.authors,
                 changes_list = _props.changes_list,
@@ -31841,7 +31860,9 @@ var ChangeTable = function (_React$Component3) {
                 { className: 'table-holder' },
                 _react2.default.createElement(
                     'div',
-                    { className: 'flex-holder' },
+                    { className: 'flex-holder', ref: function ref(holder) {
+                            return _this4.holder = holder;
+                        } },
                     _react2.default.createElement(ChangeTableSidebar, { authors: authors }),
                     changes_list.map(function (change_arr, key) {
                         return _react2.default.createElement(PatchSetResult, { key: key, change_number: change_arr[0], patchSet: change_arr[1], authors: authors, results: results[change_arr[0] + '_' + change_arr[1]] });
@@ -31985,10 +32006,11 @@ var JobResult = function (_React$Component6) {
 
             return _react2.default.createElement(
                 'div',
-                { className: 'ci-result', 'data-tip': (0, _jsxToString2.default)(_react2.default.createElement(ResultTooltip, { results: results[job] })) },
+                { className: 'ci-result' },
                 results[job].map(function (result, key) {
                     return _react2.default.createElement(CiTestResult, { result: result.result, key: key });
-                })
+                }),
+                _react2.default.createElement(ResultTooltip, { results: results[job], type: 'job' })
             );
         }
     }]);
@@ -32006,31 +32028,46 @@ JobResult.defaultProps = {
 
 
 var ResultTooltip = function ResultTooltip(_ref) {
-    var results = _ref.results;
+    var results = _ref.results,
+        type = _ref.type;
+
+
+    if (type == 'author') {
+        var test_key = 'build_result';
+    } else {
+        var test_key = 'result';
+    }
 
     return _react2.default.createElement(
         'div',
-        null,
-        results.length > 1 && _react2.default.createElement(
-            'p',
-            null,
-            results.length - 1,
-            ' recheck'
-        ),
-        results.map(function (result, key) {
-            return _react2.default.createElement(
+        { className: 'tooltip' },
+        _react2.default.createElement(
+            'div',
+            { className: 'tooltip-inner' },
+            results.length > 1 && _react2.default.createElement(
                 'p',
-                { key: key },
-                'Build result ',
-                result.build_result,
-                ' at',
-                _react2.default.createElement(
-                    _reactMoment2.default,
-                    { format: 'do MMM Y HH:mm:ss' },
-                    result.checkedOn * 1000
-                )
-            );
-        })
+                null,
+                results.length - 1,
+                ' recheck'
+            ),
+            results.map(function (result, key) {
+                return _react2.default.createElement(
+                    'div',
+                    { key: key },
+                    _react2.default.createElement(
+                        'strong',
+                        null,
+                        result[test_key]
+                    ),
+                    ' at ',
+                    _react2.default.createElement(
+                        _reactMoment2.default,
+                        { format: 'do MMM Y HH:mm:ss' },
+                        result.checkedOn * 1000
+                    )
+                );
+            })
+        )
     );
 };
 
@@ -32059,7 +32096,7 @@ var AuthorResult = function (_React$Component7) {
                 results[author].map(function (result, key) {
                     return _react2.default.createElement(CiTestResult, { result: result.build_result, key: key });
                 }),
-                _react2.default.createElement(ResultTooltip, { results: results[author] })
+                _react2.default.createElement(ResultTooltip, { results: results[author], type: 'author' })
             );
         }
     }]);

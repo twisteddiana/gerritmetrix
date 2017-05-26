@@ -82,12 +82,26 @@ class ChangeTable extends React.Component {
         results: PropTypes.object.isRequired
     }
 
+    componentWillMount() {
+        window.addEventListener('scroll', this.handleScroll.bind(this))
+    }
+
+    componentWillUnmount() {
+        window.removeEventListener('scroll', this.handleScroll.bind(this))
+    }
+
+    handleScroll() {
+        if (this.holder.getBoundingClientRect().top < 0) {
+            //this.holder.
+        }
+    }
+
     render() {
         let {authors, changes_list, results} = this.props
 
         return(
             <div className="table-holder">
-                <div className="flex-holder">
+                <div className="flex-holder" ref={ holder => this.holder = holder }>
                     <ChangeTableSidebar authors={authors}/>
                     {changes_list.map((change_arr, key) =>
                         <PatchSetResult key={key} change_number={change_arr[0]} patchSet={change_arr[1]} authors={authors} results={results[change_arr[0]+'_'+change_arr[1]]} />
@@ -176,28 +190,36 @@ class JobResult extends React.Component {
             )
 
         return (
-            <div className="ci-result" data-tip={jsxToString(<ResultTooltip results={results[job]}/>)}>
+            <div className="ci-result">
                 {results[job].map((result, key) =>
                     <CiTestResult result={result.result} key={key}/>
                 )}
-
+                <ResultTooltip results={results[job]} type="job"/>
             </div>
         )
     }
 }
 
-const ResultTooltip = ({results}) => {
+const ResultTooltip = ({results, type}) => {
+
+    if (type == 'author') {
+        var test_key = 'build_result'
+    } else {
+        var test_key = 'result'
+    }
+
     return(
-        <div>
-            {results.length > 1 &&
-            <p>{results.length - 1} recheck</p>
-            }
-            {results.map((result, key) =>
-                <p key={key}>
-                    Build result {result.build_result} at
-                    <Moment format="do MMM Y HH:mm:ss">{result.checkedOn * 1000}</Moment>
-                </p>
-            )}
+        <div className="tooltip">
+            <div className="tooltip-inner">
+                {results.length > 1 &&
+                <p>{results.length - 1} recheck</p>
+                }
+                {results.map((result, key) =>
+                    <div key={key}>
+                        <strong>{result[test_key]}</strong> at <Moment format="do MMM Y HH:mm:ss">{result.checkedOn * 1000}</Moment>
+                    </div>
+                )}
+            </div>
         </div>
     )
 }
@@ -226,7 +248,7 @@ class AuthorResult extends React.Component {
                 {results[author].map((result, key) =>
                     <CiTestResult result={result.build_result} key={key}/>
                 )}
-                <ResultTooltip results={results[author]}/>
+                <ResultTooltip results={results[author]} type="author"/>
             </div>
         )
     }

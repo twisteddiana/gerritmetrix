@@ -486,8 +486,17 @@ header .top-menu ul li a.active {
   border-right: 1px solid #e9ecf3;
   border-top: 1px solid #e9ecf3;
 }
-.table-holder .flex-holder .flex-item .ci-result > div {
+.table-holder .flex-holder .flex-item .ci-result > div:not(.tooltip) {
   flex: 1;
+}
+.table-holder .flex-holder .flex-item .ci-result:hover .tooltip {
+  opacity: 1;
+}
+.table-holder .flex-holder .flex-item .ci-result:hover .tooltip .tooltip-inner {
+  text-align: left;
+}
+.table-holder .flex-holder .flex-item .ci-result:hover .tooltip .tooltip-inner strong {
+  text-transform: uppercase;
 }
 .table-holder .flex-holder .flex-item .ci-result .fail {
   background-color: #e26a6a;
