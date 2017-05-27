@@ -54,7 +54,7 @@ const change_reducer = (state = initialState, action = {}) => {
             })
 
             let changes_list = action.change.patchSets.map((patchSet) => {
-                return [patchSet.change.number, patchSet.patchSet.number]
+                return [patchSet.change.number, patchSet.patchSet.number, patchSet.patchSet.createdOn]
             })
 
             return {
