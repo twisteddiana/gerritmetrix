@@ -81,6 +81,18 @@ class ChangeTable extends React.Component {
         results: PropTypes.object.isRequired
     }
 
+    constructor(props) {
+        super(props);
+        this.state = {
+            fixed: false,
+            hovered: {
+                job: false,
+                change: false,
+                patchSet: false
+            }
+        }
+    }
+
     componentWillMount() {
         window.addEventListener('scroll', this.handleScroll.bind(this))
     }
@@ -90,9 +102,13 @@ class ChangeTable extends React.Component {
     }
 
     handleScroll() {
-        if (this.holder.getBoundingClientRect().top < 0) {
-            //this.holder.
-        }
+        /*if (this.holder.getBoundingClientRect().top < 0) {
+            if (!this.state.fixed)
+                this.setState({...this.state, fixed: true})
+        } else {
+            if (this.state.fixed)
+                this.setState({...this.state, fixed: false})
+        }*/
     }
 
     getKey(change_arr) {
@@ -101,13 +117,23 @@ class ChangeTable extends React.Component {
 
     render() {
         let {authors, changes_list, results} = this.props
+        let classname = ''
+        if (this.state.fixed)
+            classname = ' fixed'
 
         return(
             <div className="table-holder">
-                <div className="flex-holder" ref={ holder => this.holder = holder }>
+                <div className={`flex-holder ${classname}`} ref={ holder => this.holder = holder }>
                     <ChangeTableSidebar authors={authors}/>
                     {changes_list.map((change_arr, key) =>
-                        <PatchSetResult key={this.getKey(change_arr)} change_number={change_arr[0]} patchSet={change_arr[1]} createdOn={change_arr[2]} authors={authors} results={results[change_arr[0]+'_'+change_arr[1]]} />
+                        <PatchSetResult
+                            key={this.getKey(change_arr)}
+                            change_number={change_arr[0]}
+                            patchSet={change_arr[1]}
+                            createdOn={change_arr[2]}
+                            authors={authors}
+                            results={results[change_arr[0]+'_'+change_arr[1]]}
+                        />
                     )}
                 </div>
             </div>
@@ -163,8 +189,10 @@ class PatchSetResult extends React.Component {
 
     render() {
         let { change_number, patchSet, authors, results, createdOn } = this.props;
-        if (!results)
+
+        if (!results) {
             return null
+        }
 
         return (
             <div className="flex-item">
@@ -180,10 +208,17 @@ class PatchSetResult extends React.Component {
                     <div className="author" key={key}>
                         <AuthorResult results={results[author.username]} author={author.username}
                                       key={this.getAuthorKey(author.username)}
-                                      elementKey={this.getAuthorKey(author.username)}
+                                      change_number={change_number}
+                                      patchSet={patchSet}
                         />
                         {author.jobs.map((job, key) =>
-                            <JobResult results={results[author.username]} job={job.job} elementKey={this.getJobKey(job.job)} key={this.getJobKey(job.job)}/>
+                            <JobResult
+                                results={results[author.username]}
+                                job={job.job}
+                                change_number={change_number}
+                                patchSet={patchSet}
+                                key={this.getJobKey(job.job)}
+                            />
                         )}
                     </div>
                 )}
@@ -196,26 +231,32 @@ class JobResult extends React.Component {
     static propTypes = {
         results: PropTypes.object.isRequired,
         job: PropTypes.string.isRequired,
-        elementKey: PropTypes.string
+        change_number: PropTypes.string,
+        patchSet: PropTypes.string
     }
 
     static defaultProps = {
         results: {}
     }
 
+    getKey() {
+        let {change_number, patchSet, job} = this.props
+        return change_number + '_' + patchSet + '_' + job
+    }
+
     render() {
-        let { results, job, elementKey } = this.props
+        let { results, job } = this.props
         if (typeof results[job] == 'undefined')
             return (
                 <div className="ci-result"></div>
             )
 
         return (
-            <div className="ci-result" data-tip data-for={elementKey}>
+            <div className="ci-result" data-tip data-for={this.getKey()}>
                 {results[job].map((result, key) =>
                     <CiTestResult result={result.result} key={key}/>
                 )}
-                <ReactTooltip id={elementKey}>
+                <ReactTooltip id={this.getKey()}>
                     <ResultTooltip results={results[job]} type="job"/>
                 </ReactTooltip>
             </div>
@@ -224,12 +265,11 @@ class JobResult extends React.Component {
 }
 
 const ResultTooltip = ({results, type}) => {
-
-    if (type == 'author') {
-        var test_key = 'build_result'
-    } else {
-        var test_key = 'result'
-    }
+    let test_key = '';
+    if (type == 'author')
+        test_key = 'build_result'
+    else
+        test_key = 'result'
 
     return(
         <div>
@@ -249,7 +289,8 @@ class AuthorResult extends React.Component {
     static propTypes = {
         results: PropTypes.object.isRequired,
         author: PropTypes.string.isRequired,
-        elementKey: PropTypes.string
+        change_number: PropTypes.string,
+        patchSet: PropTypes.string
     }
 
     static defaultProps = {
@@ -257,8 +298,13 @@ class AuthorResult extends React.Component {
         author: ''
     }
 
+    getKey() {
+        let { change_number, patchSet, author } = this.props;
+        return change_number + '_' + patchSet + '_' + author
+    }
+
     render() {
-        let { results, author, elementKey } = this.props
+        let { results, author } = this.props
 
         if (typeof results[author] == 'undefined')
             return (
@@ -266,11 +312,11 @@ class AuthorResult extends React.Component {
             )
 
         return (
-            <div className="ci-result" data-tip data-for={elementKey}>
+            <div className="ci-result" data-tip data-for={this.getKey()}>
                 {results[author].map((result, key) =>
                     <CiTestResult result={result.build_result} key={key}/>
                 )}
-                <ReactTooltip id={elementKey}>
+                <ReactTooltip id={this.getKey()}>
                     <ResultTooltip results={results[author]} type="author"/>
                 </ReactTooltip>
             </div>
@@ -330,13 +376,16 @@ export class Change extends React.Component {
                     </div>
                 </div>
                 <div className="box">
-                    <ChangeTable authors={ordered_authors} changes_list={changes_list} results={results_per_patchset}/>
+                    <ChangeTable
+                        authors={ordered_authors}
+                        changes_list={changes_list}
+                        results={results_per_patchset}
+                    />
                 </div>
             </div>
         )
     }
 }
-
 
 const mapStateToProps = state => {
 

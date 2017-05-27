@@ -11,11 +11,10 @@ const initialState = {
     change_number: "",
     loaded: false,
     isLoading: false,
-    change: false
+    change: false,
 }
 
 const change_reducer = (state = initialState, action = {}) => {
-    let {skip, limit} = state
     switch (action.type) {
         case SELECT_CHANGE: {
             return {

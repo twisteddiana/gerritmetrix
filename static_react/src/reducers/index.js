@@ -11,7 +11,7 @@ const gerritmetrixApp = combineReducers({
     project_reducer,
     project_changes_reducer,
     changes_reducer,
-    change_reducer
+    change_reducer,
 })
 
 export default gerritmetrixApp

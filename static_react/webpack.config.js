@@ -28,7 +28,7 @@ module.exports = {
             query: {
                 cacheDirectory: 'babel_cache',
                 presets: ['react', 'es2015', 'stage-2'],
-                plugins: ['transform-es2015-destructuring', 'transform-object-rest-spread']
+                plugins: ['transform-es2015-destructuring', 'transform-object-rest-spread', 'transform-decorators-legacy']
             }
         }, {
             test: /\.styl$/,
